@@ -1,0 +1,91 @@
+///////////////////////////////////////////////////////////////////////////////////////
+//
+// etf-client
+//
+// https://github.com/interactive-instruments/etf-client
+//
+///////////////////////////////////////////////////////////////////////////////////////
+
+buildscript {
+    repositories {
+        maven {
+            url "http://services.interactive-instruments.de/etfdev-af/plugins-releases-local"
+            credentials {
+              // Our repository requires authenticating
+              username 'ii-bda'
+              password 'AP7mb4WA6F1ckdZkaE8Qx8GSowt'
+            }}
+    }
+    dependencies {
+        classpath group: 'de.interactive_instruments.bda', name: 'etf-bda', version: '[2.0.0,2.0.99]'
+    }
+    dependencies {
+        ant.unjar src: configurations.classpath.files.find {it.path.contains('etf')}, dest: 'build/gradle'
+    }
+}
+apply from: 'build/gradle/ii-bda.gradle'
+
+///////////////////////////////////////////////////////////////////////////////////////
+
+
+group = 'de.interactive_instruments.etf'
+description = 'ETF Client library'
+
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
+
+dependencies {
+
+    compile group: 'org.json', name: 'json', version: '20190722'
+
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: etf_junitTestVersion
+    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: etf_junitTestVersion
+}
+
+test {
+    useJUnitPlatform()
+}
+
+compileJava {
+    inputs.property("moduleName", "etf.client")
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'org.json'
+        ]
+        classpath = files()
+    }
+}
+
+compileTestJava {
+    inputs.property("moduleName", "etf.client")
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'org.json',
+                '--add-modules', 'org.junit.jupiter.api'
+        ]
+        classpath = files()
+    }
+}
+
+javadoc {
+    exclude 'module-info.java'
+    exclude "**/internal/**"
+    destinationDir = file("$projectDir/docs/javadoc")
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
