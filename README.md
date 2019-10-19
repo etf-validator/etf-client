@@ -1,7 +1,7 @@
 # ETF Java Client Library
 
 [![European Union Public Licence 1.2](https://img.shields.io/badge/license-EUPL%201.2-blue.svg)](https://joinup.ec.europa.eu/software/page/eupl)
-[![API JavaDoc](http://img.shields.io/badge/JavaDoc-API-green.svg)](http://interactive-instruments.github.io/etf-client/javadoc/index.html)
+[![API JavaDoc](http://img.shields.io/badge/JavaDoc-API-green.svg)](https://interactive-instruments.github.io/etf-client/javadoc/index.html)
 
 
 The ETF Java Client library provides functionality to:
@@ -46,7 +46,7 @@ for (final TestResult testResult : result) {
 
 ```
 
-See the API [documentation](http://interactive-instruments.github.io/etf-client/javadoc/index.html) for additional details.
+See the API [documentation](https://interactive-instruments.github.io/etf-client/javadoc/index.html) for additional details.
 
 ## Mapping the results to your own model
 
@@ -69,7 +69,7 @@ structure includes all sub-elements in the result during iteration.
 ### Result Status Codes
 
 The result status codes are describe
-[here](http://interactive-instruments.github.io/etf-client/javadoc/de/interactive_instruments/etf/client/ResultStatus.html).
+[here](https://interactive-instruments.github.io/etf-client/javadoc/de/interactive_instruments/etf/client/ResultStatus.html#PASSED).
 
 
 ## Getting the library
@@ -81,7 +81,7 @@ The library is written in Java 11. The latest version can be downloaded using th
 ```groovy
 repositories {
 	maven {
-		url "http://services.interactive-instruments.de/etfdev-af/snapshot"
+		url "https://services.interactive-instruments.de/etfdev-af/snapshot"
 		// our repository requires authentication
 		credentials {
 			username 'etf-public-dev'
@@ -103,7 +103,7 @@ dependencies {
 	<repositories>
 		<repository>
 		<id>etf-repo</id>
-		<url>http://services.interactive-instruments.de/etfdev-af/snapshot</url>
+		<url>https://services.interactive-instruments.de/etfdev-af/snapshot</url>
 		</repository>
 	</repositories>
 	<!-- ... -->
