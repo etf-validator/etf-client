@@ -30,7 +30,7 @@ final EtsCollection metadataTestSuites = etfEndpoint.executableTestSuites().item
 
 // Create a new Test Object
 final String METADATA_TEST_URL =
-		"https://raw.githubusercontent.com/inspire-eu-validation/community/master/examples/Dataset_metadata_2.0_example";
+		"https://raw.githubusercontent.com/jonherrmann/community/master/examples/Dataset_metadata_2.0_example.xml";
 final AdHocTestObject testObject = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
 
 // Start the Test Run
