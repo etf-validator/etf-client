@@ -52,20 +52,36 @@ class TestRunResultCmd implements CreateResultCmd {
         private final LocalDateTime startDate;
         private final List<TestTaskResult> testTaskResults;
 
-        public DefaultTestRunResult(final JSONObject testRun, final Collection<JSONObject> testTasks,
+        public DefaultTestRunResult(final JSONObject testRun, final Collection<JSONObject> testTasksResults,
                 final Map<String, AbstractResult.ResultCtx> preparedResultCtx,
                 final SimpleGetRequest logFileRequest, final DeleteRequest deleteRequest) {
             this.logFileRequest = logFileRequest;
             this.deleteRequest = deleteRequest;
             startDate = LocalDateTime.from(DateTimeFormatter.ISO_DATE_TIME.parse(testRun.getString("startTimestamp")));
             testTaskResults = new ArrayList<>();
-            for (final JSONObject testTaskResult : testTasks) {
+            for (final JSONObject testTaskResult : testTasksResults) {
                 final AbstractResult.ResultCtx resultCtx = preparedResultCtx.get(
                         testTaskResult.getJSONObject("resultedFrom").getString("ref"));
                 testTaskResults.add(new TestTaskResultImpl(Objects.requireNonNull(resultCtx,
                         "Executable Test Suite not found").newChild(testTaskResult)));
             }
-
+            if (testTasksResults.isEmpty()) {
+                final Collection<JSONObject> testTasks = new JSONObjectOrArray(
+                        (JSONObject) testRun.get("testTasks")).get("TestTask");
+                for (final JSONObject testTask : testTasks) {
+                    // the test result is undefined
+                    final String ref = testTask.getJSONObject("executableTestSuite").getString("ref");
+                    final AbstractResult.ResultCtx resultCtx = preparedResultCtx.get(ref);
+                    final JSONObject result = new JSONObject();
+                    result.put("testModuleResults", new JSONObject().put("TestModuleResult", "NONE"));
+                    result.put("resultedFrom", new JSONObject().put("ref", ref));
+                    result.put("status", "UNDEFINED");
+                    result.put("startTimestamp", testRun.getString("startTimestamp"));
+                    result.put("duration", 0);
+                    final AbstractResult.ResultCtx undefinedTestTaskResult = resultCtx.newChild(result);
+                    testTaskResults.add(new TestTaskResultImpl(undefinedTestTaskResult));
+                }
+            }
         }
 
         @Override
@@ -125,9 +141,14 @@ class TestRunResultCmd implements CreateResultCmd {
         }
         final JSONObject testRun = result.getJSONObject("EtfItemCollection").getJSONObject(
                 "testRuns").getJSONObject("TestRun");
-        final Collection<JSONObject> testTasks = new JSONObjectOrArray(result.getJSONObject("EtfItemCollection").getJSONObject(
-                "referencedItems").getJSONObject("testTaskResults")).get("TestTaskResult");
-        return new DefaultTestRunResult(testRun, testTasks, this.preparedResultCtx,
+        final JSONObject referencedItems = result.getJSONObject("EtfItemCollection").getJSONObject("referencedItems");
+        final Collection<JSONObject> testTasksResults;
+        if (!referencedItems.isNull("testTaskResults")) {
+            testTasksResults = new JSONObjectOrArray(referencedItems.getJSONObject("testTaskResults")).get("TestTaskResult");
+        } else {
+            testTasksResults = Collections.emptyList();
+        }
+        return new DefaultTestRunResult(testRun, testTasksResults, this.preparedResultCtx,
                 this.logFileRequest, this.deleteRequest);
     }
 }

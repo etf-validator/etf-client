@@ -40,10 +40,11 @@ abstract class Request {
 
     Request(final URI url, final InstanceCtx ctx) {
         this.requestBuilder = HttpRequest.newBuilder(url)
-                .header("Accept", ACCEPT_HEADER)
                 .timeout(Duration.ofMinutes(2))
-                .headers("User-Agent", USER_AGENT_HEADER)
-                .headers("ETF-Client-Session-ID", ctx.sessionId);
+                .header("Accept", ACCEPT_HEADER)
+                .header("Accept-Language", ctx.locale.getLanguage())
+                .header("User-Agent", USER_AGENT_HEADER)
+                .header("ETF-Client-Session-ID", ctx.sessionId);
         if (ctx.auth != null) {
             this.httpClient = HttpClient.newBuilder().authenticator(ctx.auth).build();
         } else {

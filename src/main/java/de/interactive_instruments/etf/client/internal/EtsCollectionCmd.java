@@ -46,29 +46,31 @@ class EtsCollectionCmd {
 
     private static class DefaultEtsCollection extends AbstractEtfCollection<ExecutableTestSuite> implements EtsCollection {
 
-        private final ExecutorService executor;
+        // Main collection that contains all ETS (required for resolving dependent ETS)
+        private final ExecutionContext executionContext;
         private EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection;
 
         DefaultEtsCollection(final InstanceCtx ctx, final JSONArray jsonArray,
                 final ExecutorService executor,
                 final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
             super(ctx);
-            this.executor = executor;
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
+            this.executionContext = new ExecutionContext(ctx, executor);
             initChildren(jsonArray);
+            this.executionContext.injectExecutableTestSuites(this.items.values());
         }
 
-        DefaultEtsCollection(final InstanceCtx ctx, final Collection<ExecutableTestSuite> executableTestSuites,
-                final ExecutorService executor,
+        private DefaultEtsCollection(final ExecutionContext executionContext,
+                final Collection<ExecutableTestSuite> filteredItems,
                 final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
-            super(ctx, executableTestSuites);
-            this.executor = executor;
+            super(executionContext.instanceCtx, filteredItems);
+            this.executionContext = executionContext;
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
         }
 
         @Override
         ExecutableTestSuite doPrepare(final JSONObject jsonObject) {
-            return new EtsImpl(this.ctx, jsonObject, this.executor, this.translationTemplateBundleCollection);
+            return new EtsImpl(this.executionContext, jsonObject, this.translationTemplateBundleCollection);
         }
 
         @Override
@@ -77,24 +79,24 @@ class EtsCollectionCmd {
                     .filter(it -> it.tagEids().stream().anyMatch(
                             tagEid -> tagEid.equals(tag.eid())))
                     .collect(Collectors.toList());
-            return new DefaultEtsCollection(this.ctx, filteredItems, executor, translationTemplateBundleCollection);
+            return new DefaultEtsCollection(this.executionContext, filteredItems, translationTemplateBundleCollection);
         }
 
         @Override
         public EtsCollection itemsById(final String... eids) {
-            if(eids==null || eids.length==0) {
+            if (eids == null || eids.length == 0) {
                 throw new IllegalArgumentException("EIDs are empty");
             }
             final List<ExecutableTestSuite> filteredItems = Arrays.stream(eids).map(this.items::get).filter(
                     Objects::nonNull).collect(Collectors.toList());
-            if(eids.length != filteredItems.size()) {
+            if (eids.length != filteredItems.size()) {
                 for (final String eid : eids) {
-                    if(filteredItems.stream().map(ItemMetadata::eid).findFirst().isEmpty()) {
-                        throw new IllegalArgumentException("Executable Test Suite with EID '"+eid+"' not found");
+                    if (filteredItems.stream().map(ItemMetadata::eid).findFirst().isEmpty()) {
+                        throw new IllegalArgumentException("Executable Test Suite with EID '" + eid + "' not found");
                     }
                 }
             }
-            return new DefaultEtsCollection(this.ctx, filteredItems, executor, translationTemplateBundleCollection);
+            return new DefaultEtsCollection(this.executionContext, filteredItems, translationTemplateBundleCollection);
         }
 
         @Override
@@ -114,7 +116,7 @@ class EtsCollectionCmd {
                     throw new IncompatibleTestObjectTypes();
                 }
             }
-            return TestRunCmd.prepare(this.ctx, executor, this.items.values(), testObject, testRunObserver);
+            return executionContext.start(this.items.values(), testObject, testRunObserver);
         }
 
         EtsCollection inject(final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {

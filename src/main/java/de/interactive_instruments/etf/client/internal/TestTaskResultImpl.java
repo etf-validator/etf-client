@@ -35,8 +35,7 @@ class TestTaskResultImpl extends AbstractResult implements TestTaskResult {
     private final Collection<TestModuleResult> testModuleResults;
 
     TestTaskResultImpl(final ResultCtx resultCtx) {
-        super(resultCtx);
-
+        super(resultCtx.withAttachments());
         testModuleResults = (Collection<TestModuleResult>) createChildren(
                 resultCtx.jsonObj, "testModuleResults", "TestModuleResult");
     }

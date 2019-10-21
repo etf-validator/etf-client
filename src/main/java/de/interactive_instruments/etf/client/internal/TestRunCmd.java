@@ -109,7 +109,7 @@ class TestRunCmd implements TestRun {
     private final InstanceCtx ctx;
     private Exception exception;
 
-    TestRunCmd(final InstanceCtx ctx, final TestRunObserver testRunObserver) {
+    private TestRunCmd(final InstanceCtx ctx, final TestRunObserver testRunObserver) {
         this.testRunObserver = testRunObserver;
         this.ctx = ctx;
     }
@@ -137,7 +137,7 @@ class TestRunCmd implements TestRun {
         this.logEntries.addAll(logEntries);
     }
 
-    DeleteRequest deleteRequest() {
+    private DeleteRequest deleteRequest() {
         return deleteRequest;
     }
 
@@ -172,7 +172,7 @@ class TestRunCmd implements TestRun {
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
-        final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ets -> ets.eid())
+        final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ItemMetadata::eid)
                 .collect(Collectors.toList());
         startTestRequest.put("executableTestSuiteIds", executableTestSuiteIds);
         startTestRequest.put("arguments", new JSONObject());
@@ -205,14 +205,21 @@ class TestRunCmd implements TestRun {
         }
     }
 
-    static TestRun prepare(final InstanceCtx ctx, final ExecutorService executor,
-            final Collection<ExecutableTestSuite> executableTestSuites, final TestObject testObject,
+    static TestRun start(final InstanceCtx ctx, final ExecutorService executor,
+            final Collection<ExecutableTestSuite> selectedExecutableTestSuites,
+            final Collection<ExecutableTestSuite> allExecutableTestSuites,
+            final TestObject testObject,
             final TestRunObserver testRunObserver) throws RemoteInvocationException {
         final TestRunCmd testRunCmd = new TestRunCmd(ctx, testRunObserver);
-        final String eid = testRunCmd.start(executableTestSuites, testObject);
+        final String eid = testRunCmd.start(selectedExecutableTestSuites, testObject);
+        return prepareResultStructure(ctx, executor, allExecutableTestSuites, testRunCmd, eid);
+    }
 
+    private static TestRun prepareResultStructure(final InstanceCtx ctx, final ExecutorService executor,
+            final Collection<ExecutableTestSuite> allExecutableTestSuites,
+            final TestRunCmd testRunCmd, final String eid) {
         final Map<String, AbstractResult.ResultCtx> etsMap = new HashMap<>();
-        for (final ExecutableTestSuite executableTestSuite : executableTestSuites) {
+        for (final ExecutableTestSuite executableTestSuite : allExecutableTestSuites) {
             etsMap.put(executableTestSuite.eid(), new AbstractResult.ResultCtx(
                     ctx, executableTestSuite));
         }

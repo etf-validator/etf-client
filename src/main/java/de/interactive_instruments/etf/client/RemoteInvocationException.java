@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.http.HttpResponse;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * An error returned by the ETF instance
@@ -36,7 +37,16 @@ public class RemoteInvocationException extends Exception {
 
     public RemoteInvocationException(final HttpResponse response) {
         this.statusCode = response.statusCode();
-        this.responseBody = response.body();
+        JSONObject jsonObject = null;
+        if (response.body() != null)
+            try {
+                jsonObject = new JSONObject(response.body().toString());
+            } catch (JSONException ignored) {}
+        if (jsonObject != null) {
+            this.responseBody = jsonObject;
+        } else {
+            this.responseBody = response.body();
+        }
     }
 
     public RemoteInvocationException(final JSONException jsonException, final HttpResponse response) {
@@ -68,5 +78,18 @@ public class RemoteInvocationException extends Exception {
 
     public Object responseBody() {
         return this.responseBody;
+    }
+
+    public String toString() {
+        if (this.statusCode == 0) {
+            return super.toString();
+        }
+        if (this.responseBody != null && this.responseBody instanceof JSONObject) {
+            final JSONObject jsonObject = ((JSONObject) this.responseBody);
+            if (jsonObject.has("error")) {
+                return this.statusCode + " - " + jsonObject.getString("error");
+            }
+        }
+        return String.valueOf(this.statusCode);
     }
 }

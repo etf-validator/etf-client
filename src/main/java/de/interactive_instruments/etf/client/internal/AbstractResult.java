@@ -20,13 +20,11 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.ExecutableTestSuite;
@@ -50,17 +48,39 @@ abstract class AbstractResult implements TestResult {
         final InstanceCtx ctx;
         private final EtsImpl ets;
         final JSONObject jsonObj;
+        private final EidObjectMapping attachmentMappings;
 
         ResultCtx(final InstanceCtx ctx, final ExecutableTestSuite ets) {
             this.ctx = ctx;
             this.ets = (EtsImpl) ets;
             this.jsonObj = null;
+            attachmentMappings = null;
         }
 
         private ResultCtx(final ResultCtx other, final JSONObject jsonObj) {
             this.ctx = other.ctx;
             this.ets = other.ets;
             this.jsonObj = jsonObj;
+            attachmentMappings = other.attachmentMappings;
+        }
+
+        public ResultCtx(final ResultCtx other, final EidObjectMapping attachmentMappings) {
+            this.ctx = other.ctx;
+            this.ets = other.ets;
+            this.jsonObj = other.jsonObj;
+            this.attachmentMappings = attachmentMappings;
+        }
+
+        ResultCtx withAttachments() {
+            final EidObjectMappingBuilder mappingBuilder = new EidObjectMappingBuilder();
+            if (!this.jsonObj.isNull("attachments")) {
+                final Collection<JSONObject> attachments = new JSONObjectOrArray(
+                        this.jsonObj.getJSONObject("attachments")).get("Attachment");
+                for (final JSONObject attachment : attachments) {
+                    mappingBuilder.add(attachment);
+                }
+            }
+            return new ResultCtx(this, mappingBuilder.build());
         }
 
         ResultCtx newChild(final JSONObject childObject) {
@@ -71,7 +91,11 @@ abstract class AbstractResult implements TestResult {
             return ets.translate(ctx.locale, messageJson);
         }
 
-        EidObjectMapping eidObjectMapping() {
+        EidObjectMapping attachmentMappings() {
+            return attachmentMappings;
+        }
+
+        EidObjectMapping etsMappings() {
             return ets.objectMapping();
         }
     }
@@ -79,11 +103,10 @@ abstract class AbstractResult implements TestResult {
     protected AbstractResult(final ResultCtx resultCtx) {
         this.resultCtx = resultCtx;
         final String eidRef = this.resultCtx.jsonObj.getJSONObject("resultedFrom").getString("ref");
-        final JSONObject etsItem = this.resultCtx.eidObjectMapping().resolve(eidRef);
+        final JSONObject etsItem = this.resultCtx.etsMappings().resolve(eidRef);
         this.label = etsItem.getString("label");
-        this.description = etsItem.getString("description");
+        this.description = etsItem.isNull("description") ? "" : etsItem.getString("description");
         this.status = ResultStatus.fromString(this.resultCtx.jsonObj.getString("status"));
-        final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZ");
         this.startDate = LocalDateTime.from(
                 DateTimeFormatter.ISO_DATE_TIME.parse(
                         this.resultCtx.jsonObj.getString("startTimestamp")));
@@ -92,27 +115,22 @@ abstract class AbstractResult implements TestResult {
 
     protected Collection<? extends TestResult> createChildren(final JSONObject jsonObj, final String name,
             final String childrenName) {
-        final Object childrenJson = jsonObj.getJSONObject(name).get(childrenName);
-        if (childrenJson instanceof JSONArray) {
-            final JSONArray childrenArray = (JSONArray) childrenJson;
-            final Collection<TestResult> children = new ArrayList<>(((JSONArray) childrenJson).length());
-            for (final Object o : childrenArray) {
-                children.add(doCreateChild((JSONObject) o));
-            }
-            return Collections.unmodifiableCollection(children);
-        } else if (childrenJson instanceof JSONObject) {
-            return Collections.singleton(doCreateChild((JSONObject) childrenJson));
-        } else {
+        if (jsonObj.isNull(name)) {
             return Collections.emptyList();
         }
+        final Collection<JSONObject> childCollection = new JSONObjectOrArray(jsonObj.getJSONObject(name)).get(childrenName);
+        return childCollection.stream()
+                .filter(child -> !child.isNull("resultedFrom") && !child.getJSONObject("resultedFrom").isNull("ref"))
+                .map(this::doCreateChild)
+                .collect(Collectors.toCollection(() -> new ArrayList<>(childCollection.size())));
     }
 
     private void addAttachment(final Map<String, String> attachmentMap, final JSONObject jsonObj) {
         final String attachmentLabel = jsonObj.getString("label");
-        if (jsonObj.has("embeddedData")) {
+        if (!jsonObj.isNull("embeddedData")) {
             final String decodedStr = new String(Base64.getDecoder().decode(jsonObj.getString("embeddedData")));
             attachmentMap.put(attachmentLabel, decodedStr);
-        } else if (jsonObj.has("referencedData")) {
+        } else if (!jsonObj.isNull("referencedData")) {
             final String mimeType = jsonObj.getString("mimeType");
             final String ref = jsonObj.getJSONObject("referencedData").getString("href");
             if ("text/plain".equals(mimeType)) {
@@ -121,7 +139,7 @@ abstract class AbstractResult implements TestResult {
                     final String value = new SimpleGetRequest(uri, this.resultCtx.ctx).query();
                     attachmentMap.put(label, value);
                 } catch (RemoteInvocationException e) {
-                    throw new IllegalStateException(e);
+                    attachmentMap.put(label, ref);
                 }
             } else {
                 attachmentMap.put(label, ref);
@@ -130,24 +148,16 @@ abstract class AbstractResult implements TestResult {
     }
 
     protected Map<String, String> createAttachments(final JSONObject jsonObj) {
-        if (jsonObj.has("attachments")) {
-            final Object childrenJson = jsonObj.getJSONObject("attachments").get("attachment");
-            if (childrenJson instanceof JSONArray) {
-                final JSONArray childrenArray = (JSONArray) childrenJson;
-                final Map<String, String> attachments = new HashMap<>();
-                for (final Object o : childrenArray) {
-                    final String ref = ((JSONObject) o).getString("ref");
-                    final JSONObject attachmentJson = this.resultCtx.eidObjectMapping().resolve(ref);
-                    addAttachment(attachments, attachmentJson);
-                }
-                return Collections.unmodifiableMap(attachments);
-            } else if (childrenJson instanceof JSONObject) {
-                final Map<String, String> attachments = new HashMap<>();
-                addAttachment(attachments, (JSONObject) childrenJson);
-                return Collections.unmodifiableMap(attachments);
-            } else {
-                return Collections.emptyMap();
+        if (!jsonObj.isNull("attachments")) {
+            final Collection<JSONObject> attachmentObjects = new JSONObjectOrArray(
+                    jsonObj.getJSONObject("attachments")).get("attachment");
+            final Map<String, String> attachments = new HashMap<>();
+            for (final JSONObject attachment : attachmentObjects) {
+                final String ref = attachment.getString("ref");
+                final JSONObject attachmentJson = this.resultCtx.attachmentMappings().resolve(ref);
+                addAttachment(attachments, attachmentJson);
             }
+            return Collections.unmodifiableMap(attachments);
         } else {
             return Collections.emptyMap();
         }
@@ -183,7 +193,7 @@ abstract class AbstractResult implements TestResult {
         private Iterator<? extends TestResult> currentItChild;
         private TestResult next;
 
-        public TestResultIterator(final Iterator<? extends TestResult> it) {
+        TestResultIterator(final Iterator<? extends TestResult> it) {
             this.mainIt = it;
         }
 

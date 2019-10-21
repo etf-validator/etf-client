@@ -19,14 +19,16 @@ The ETF Java Client library provides functionality to:
 import de.interactive_instruments.etf.client.*;
 
 // Create an endpoint object for the remote ETF instance
-final EtfEndpoint etfEndpoint = EtfValidatorClient.create().url(
-		new URL("http://SERVICE/etf-webapp")).init();
+final EtfEndpoint etfEndpoint = EtfValidatorClient.create()
+	.url(new URL("http://SERVICE/etf-webapp"))
+	.locale(Locale.ENGLISH)
+	.init();
 
 // Get metadata Tag
-final Tag metadataTag = etfEndpoint.tags().itemByLabel("Metadata (TG version 2.0) - BETA");
+final Tag metadataTag = etfEndpoint.tags().itemByLabel("Metadata (TG version 2.0) - BETA").get();
 
 // Get a collection of Executable Test Suites with the Metadata Tag
-final EtsCollection metadataTestSuites = etfEndpoint.executableTestSuites().itemsByTag(metadataTag).get();
+final EtsCollection metadataTestSuites = etfEndpoint.executableTestSuites().itemsByTag(metadataTag);
 
 // Create a new Test Object
 final String METADATA_TEST_URL =

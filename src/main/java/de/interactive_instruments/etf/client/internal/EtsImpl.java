@@ -20,7 +20,6 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,18 +31,16 @@ import de.interactive_instruments.etf.client.*;
  */
 final class EtsImpl extends Metadata implements ExecutableTestSuite {
 
-    private final ExecutorService executor;
+    private final ExecutionContext executionContext;
     private final TestObjectBaseType baseType;
-    private final InstanceCtx ctx;
     private final Collection<String> tagEids;
     private final TranslationTemplateBundle bundle;
     private final EidObjectMapping eidObjectMappings;
 
-    EtsImpl(final InstanceCtx ctx, final JSONObject jsonObject, final ExecutorService executor,
+    EtsImpl(final ExecutionContext executionContext, final JSONObject jsonObject,
             final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
         super(jsonObject);
-        this.ctx = ctx;
-        this.executor = executor;
+        this.executionContext = executionContext;
         final String testDriverRef = jsonObject.getJSONObject("testDriver").getString("href");
         // fastest approach in the INSPIRE validator environment
         if (testDriverRef.contains("4dddc9e2-1b21-40b7-af70-6a2d156ad130")) {
@@ -160,7 +157,7 @@ final class EtsImpl extends Metadata implements ExecutableTestSuite {
         if (!testObject.baseType().equals(this.baseType)) {
             throw new IncompatibleTestObjectTypes();
         }
-        return TestRunCmd.prepare(this.ctx, executor, Collections.singleton(this), testObject, testRunObserver);
+        return this.executionContext.start(Collections.singleton(this), testObject, testRunObserver);
     }
 
     EidObjectMapping objectMapping() {
