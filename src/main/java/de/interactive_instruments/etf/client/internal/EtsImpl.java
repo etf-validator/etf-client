@@ -138,7 +138,16 @@ final class EtsImpl extends Metadata implements ExecutableTestSuite {
             final JSONObject translationArguments = messageJson.getJSONObject("translationArguments");
             final Collection<JSONObject> arguments = new JSONObjectOrArray(translationArguments).get("argument");
             for (final JSONObject argument : arguments) {
-                parameterMap.put(argument.getString("token"), argument.get("$").toString());
+                if(!argument.has("token")) {
+                    throw new ReferenceError("No token provided in the Translation Argument. "
+                            + "This is most likely a bug in the Executable Test Suite. Translation Argument: "+argument.toString());
+                }
+                if(argument.has("$")) {
+                    parameterMap.put(argument.getString("token"), argument.get("$").toString());
+                }else{
+                    // The necessary information is missing in the error message. Hopefully the user will understand the error...
+                    parameterMap.put(argument.getString("token"), "");
+                }
             }
         } else {
             parameterMap = null;
