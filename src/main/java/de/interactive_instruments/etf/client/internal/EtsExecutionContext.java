@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -28,18 +25,18 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-final class ExecutionContext {
-    private Collection<ExecutableTestSuite> allExecutableTestSuites;
+final class EtsExecutionContext {
+    private Iterable<ExecutableTestSuite> allExecutableTestSuites;
     final InstanceCtx instanceCtx;
     private final ExecutorService executor;
 
-    ExecutionContext(final InstanceCtx instanceCtx, final ExecutorService executor) {
+    EtsExecutionContext(final InstanceCtx instanceCtx, final ExecutorService executor) {
         this.allExecutableTestSuites = Collections.emptyList();
         this.instanceCtx = instanceCtx;
         this.executor = executor;
     }
 
-    public void injectExecutableTestSuites(final Collection<ExecutableTestSuite> allExecutableTestSuites) {
+    public void injectExecutableTestSuites(final Iterable<ExecutableTestSuite> allExecutableTestSuites) {
         this.allExecutableTestSuites = allExecutableTestSuites;
     }
 

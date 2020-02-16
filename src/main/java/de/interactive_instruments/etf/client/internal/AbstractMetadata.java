@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -26,13 +23,13 @@ import de.interactive_instruments.etf.client.ItemMetadata;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-abstract class Metadata implements ItemMetadata {
+abstract class AbstractMetadata implements ItemMetadata {
 
     private final String eid;
     private final String label;
     private final String description;
 
-    Metadata(final JSONObject jsonObject) {
+    AbstractMetadata(final JSONObject jsonObject) {
         eid = jsonObject.getString("id");
         label = jsonObject.getString("label");
         description = jsonObject.has("description") ? jsonObject.getString("label") : "";
@@ -48,5 +45,34 @@ abstract class Metadata implements ItemMetadata {
 
     final public String description() {
         return description;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("{");
+        sb.append("eid='").append(eid).append('\'');
+        sb.append(", label='").append(label).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
+    protected static String eidFromUrl(final String url) {
+        final int lastBackslash = url.lastIndexOf('/');
+        final int p = url.lastIndexOf('.');
+        final String eid;
+        if (lastBackslash >= 0) {
+            if (p > 0) {
+                eid = url.substring(url.lastIndexOf('/') + 1, p);
+            } else {
+                eid = url.substring(url.lastIndexOf('/') + 1);
+            }
+        } else {
+            eid = url;
+        }
+        if (eid.startsWith("EID")) {
+            return eid;
+        }
+        return "EID" + eid;
     }
 }

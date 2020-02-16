@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -23,8 +20,11 @@ import java.net.Authenticator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.interactive_instruments.etf.client.*;
 
@@ -39,14 +39,17 @@ final class EndpointImpl implements EtfEndpoint {
     private final InstanceStatusCmd statusCmd;
     private final TagCollectionCmd tagCmd;
     private final EtsCollectionCmd etsCollectionCmd;
+    private final TestRunTemplateCollectionCmd trtCollectionCmd;
     private final TranslationTemplateBundleCollectionCmd ttCollectionCmd;
     private final AdHocTestObjectFactoryImpl adHocTestObjectFactory;
+    private boolean testRunTemplatesSupported;
 
-    EndpointImpl(final URL baseUrl, final Locale locale, final Authenticator auth) {
-        this.ctx = new InstanceCtx(toBaseUri(baseUrl), auth, locale);
+    EndpointImpl(final URL baseUrl, final Locale locale, final Authenticator auth, final Duration timout) {
+        this.ctx = new InstanceCtx(toBaseUri(baseUrl), auth, locale, timout);
         this.statusCmd = new InstanceStatusCmd(ctx);
         this.tagCmd = new TagCollectionCmd(ctx);
         this.etsCollectionCmd = new EtsCollectionCmd(ctx);
+        this.trtCollectionCmd = new TestRunTemplateCollectionCmd(ctx);
         this.ttCollectionCmd = new TranslationTemplateBundleCollectionCmd(ctx);
         this.adHocTestObjectFactory = new AdHocTestObjectFactoryImpl(ctx);
     }
@@ -62,6 +65,28 @@ final class EndpointImpl implements EtfEndpoint {
             return new URI(url + "/" + apiVersion);
         } catch (final URISyntaxException e) {
             throw new IllegalArgumentException(e);
+        }
+    }
+
+    private void ensureTestRunTemplateSupport() throws RemoteInvocationException {
+        if (!testRunTemplatesSupported) {
+            final EtfStatus status = status();
+            final String version = status.version();
+            try {
+                final Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\..*");
+                final Matcher m = p.matcher(version);
+                if (m.matches()) {
+                    final int major = Integer.parseInt(m.group(1));
+                    final int minor = Integer.parseInt(m.group(2));
+                    if (major >= 2 && minor >= 1) {
+                        testRunTemplatesSupported = true;
+                        return;
+                    }
+                }
+            } catch (final NumberFormatException e) {
+                // ignore
+            }
+            throw new FeatureNotSupportedException(version, "2.1");
         }
     }
 
@@ -82,7 +107,7 @@ final class EndpointImpl implements EtfEndpoint {
 
     @Override
     public EtsCollection executableTestSuites() throws RemoteInvocationException {
-        final CompletableFuture ttCollectionFuture = CompletableFuture.supplyAsync(() -> {
+        final CompletableFuture<?> ttCollectionFuture = CompletableFuture.supplyAsync(() -> {
             try {
                 return ttCollectionCmd.query();
             } catch (final RemoteInvocationException e) {
@@ -95,6 +120,26 @@ final class EndpointImpl implements EtfEndpoint {
     @Override
     public EtfCollection<Tag> tags() throws RemoteInvocationException {
         return tagCmd.query();
+    }
+
+    @Override
+    public EtfCollection<TestRunTemplate> testRunTemplates() throws RemoteInvocationException {
+        ensureTestRunTemplateSupport();
+        final CompletableFuture ttCollectionFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return ttCollectionCmd.query();
+            } catch (final RemoteInvocationException e) {
+                return e;
+            }
+        });
+        final CompletableFuture etsCollectionFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return etsCollectionCmd.query(ttCollectionFuture);
+            } catch (final RemoteInvocationException e) {
+                return e;
+            }
+        });
+        return this.trtCollectionCmd.query(ttCollectionFuture, etsCollectionFuture);
     }
 
     @Override

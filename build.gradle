@@ -17,7 +17,7 @@ buildscript {
             }}
     }
     dependencies {
-        classpath group: 'de.interactive_instruments.bda', name: 'etf-bda', version: '[2.0.0,2.0.99]'
+        classpath group: 'de.interactive_instruments.bda', name: 'etf-bda', version: '[2.0.8,2.0.99]'
     }
     dependencies {
         ant.unjar src: configurations.classpath.files.find {it.path.contains('etf')}, dest: 'build/gradle'
@@ -38,8 +38,7 @@ dependencies {
 
     compile group: 'org.json', name: 'json', version: '20190722'
 
-    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: etf_junitTestVersion
-    testRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: etf_junitTestVersion
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: etf_junitTestVersion
 }
 
 test {

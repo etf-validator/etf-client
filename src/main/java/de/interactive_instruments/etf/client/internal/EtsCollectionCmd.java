@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -25,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -47,7 +43,7 @@ class EtsCollectionCmd {
     private static class DefaultEtsCollection extends AbstractEtfCollection<ExecutableTestSuite> implements EtsCollection {
 
         // Main collection that contains all ETS (required for resolving dependent ETS)
-        private final ExecutionContext executionContext;
+        private final EtsExecutionContext etsExecutionContext;
         private EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection;
 
         DefaultEtsCollection(final InstanceCtx ctx, final JSONArray jsonArray,
@@ -55,22 +51,22 @@ class EtsCollectionCmd {
                 final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
             super(ctx);
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
-            this.executionContext = new ExecutionContext(ctx, executor);
+            this.etsExecutionContext = new EtsExecutionContext(ctx, executor);
             initChildren(jsonArray);
-            this.executionContext.injectExecutableTestSuites(this.items.values());
+            this.etsExecutionContext.injectExecutableTestSuites(this.items.values());
         }
 
-        private DefaultEtsCollection(final ExecutionContext executionContext,
+        private DefaultEtsCollection(final EtsExecutionContext etsExecutionContext,
                 final Collection<ExecutableTestSuite> filteredItems,
                 final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
-            super(executionContext.instanceCtx, filteredItems);
-            this.executionContext = executionContext;
+            super(etsExecutionContext.instanceCtx, filteredItems);
+            this.etsExecutionContext = etsExecutionContext;
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
         }
 
         @Override
         ExecutableTestSuite doPrepare(final JSONObject jsonObject) {
-            return new EtsImpl(this.executionContext, jsonObject, this.translationTemplateBundleCollection);
+            return new ExecutableTestSuiteImpl(this.etsExecutionContext, jsonObject, this.translationTemplateBundleCollection);
         }
 
         @Override
@@ -79,7 +75,7 @@ class EtsCollectionCmd {
                     .filter(it -> it.tagEids().stream().anyMatch(
                             tagEid -> tagEid.equals(tag.eid())))
                     .collect(Collectors.toList());
-            return new DefaultEtsCollection(this.executionContext, filteredItems, translationTemplateBundleCollection);
+            return new DefaultEtsCollection(this.etsExecutionContext, filteredItems, translationTemplateBundleCollection);
         }
 
         @Override
@@ -96,27 +92,27 @@ class EtsCollectionCmd {
                     }
                 }
             }
-            return new DefaultEtsCollection(this.executionContext, filteredItems, translationTemplateBundleCollection);
+            return new DefaultEtsCollection(this.etsExecutionContext, filteredItems, translationTemplateBundleCollection);
         }
 
         @Override
         public TestRun execute(final TestObject testObject)
-                throws RemoteInvocationException, IncompatibleTestObjectTypes, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
             return execute(testObject, null);
         }
 
         @Override
         public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
-                throws RemoteInvocationException, IncompatibleTestObjectTypes, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
             if (this.items.isEmpty()) {
                 throw new IllegalStateException("The Executable Test Suite Collection is empty");
             }
             for (final ExecutableTestSuite ets : this.items.values()) {
                 if (!testObject.baseType().equals(ets.supportedBaseType())) {
-                    throw new IncompatibleTestObjectTypes();
+                    throw new IncompatibleTestObjectTypesException();
                 }
             }
-            return executionContext.start(this.items.values(), testObject, testRunObserver);
+            return etsExecutionContext.start(this.items.values(), testObject, testRunObserver);
         }
 
         EtsCollection inject(final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
@@ -134,16 +130,8 @@ class EtsCollectionCmd {
     }
 
     synchronized EtsCollection query(final CompletableFuture ttCollectionFuture) throws RemoteInvocationException {
-        final Object futureResult;
-        try {
-            futureResult = ttCollectionFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
-        }
-        if (futureResult instanceof RemoteInvocationException) {
-            throw (RemoteInvocationException) futureResult;
-        }
-        final EtfCollection<TranslationTemplateBundle> ttCResult = (EtfCollection<TranslationTemplateBundle>) futureResult;
+        final EtfCollection<TranslationTemplateBundle> ttCResult = (EtfCollection<TranslationTemplateBundle>) AbstractCollectionCmd
+                .toCollection(ttCollectionFuture);
         if (apiCall.upToDate()) {
             return cachedCollection.inject(ttCResult);
         } else {

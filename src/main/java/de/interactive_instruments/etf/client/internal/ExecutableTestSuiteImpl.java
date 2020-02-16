@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -29,21 +26,22 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-final class EtsImpl extends Metadata implements ExecutableTestSuite {
+final class ExecutableTestSuiteImpl extends AbstractMetadata implements ExecutableTestSuite {
 
-    private final ExecutionContext executionContext;
+    private final EtsExecutionContext etsExecutionContext;
     private final TestObjectBaseType baseType;
     private final Collection<String> tagEids;
     private final TranslationTemplateBundle bundle;
     private final EidObjectMapping eidObjectMappings;
 
-    EtsImpl(final ExecutionContext executionContext, final JSONObject jsonObject,
+    ExecutableTestSuiteImpl(final EtsExecutionContext etsExecutionContext, final JSONObject jsonObject,
             final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
         super(jsonObject);
-        this.executionContext = executionContext;
+        this.etsExecutionContext = etsExecutionContext;
         final String testDriverRef = jsonObject.getJSONObject("testDriver").getString("href");
         // fastest approach in the INSPIRE validator environment
-        if (testDriverRef.contains("4dddc9e2-1b21-40b7-af70-6a2d156ad130")) {
+        if (testDriverRef.contains("4dddc9e2-1b21-40b7-af70-6a2d156ad130")
+                || testDriverRef.contains("c8f39ab3-b0e4-4e06-924a-f31cc99a4932")) {
             baseType = TestObjectBaseType.DATA_SET;
         } else {
             baseType = TestObjectBaseType.SERVICE;
@@ -101,25 +99,6 @@ final class EtsImpl extends Metadata implements ExecutableTestSuite {
         }
     }
 
-    private static String eidFromUrl(final String url) {
-        final int lastBackslash = url.lastIndexOf('/');
-        final int p = url.lastIndexOf('.');
-        final String eid;
-        if (lastBackslash >= 0) {
-            if (p > 0) {
-                eid = url.substring(url.lastIndexOf('/') + 1, p);
-            } else {
-                eid = url.substring(url.lastIndexOf('/') + 1);
-            }
-        } else {
-            eid = url;
-        }
-        if (eid.startsWith("EID")) {
-            return eid;
-        }
-        return "EID" + eid;
-    }
-
     @Override
     public TestObjectBaseType supportedBaseType() {
         return this.baseType;
@@ -138,14 +117,16 @@ final class EtsImpl extends Metadata implements ExecutableTestSuite {
             final JSONObject translationArguments = messageJson.getJSONObject("translationArguments");
             final Collection<JSONObject> arguments = new JSONObjectOrArray(translationArguments).get("argument");
             for (final JSONObject argument : arguments) {
-                if(!argument.has("token")) {
+                if (!argument.has("token")) {
                     throw new ReferenceError("No token provided in the Translation Argument. "
-                            + "This is most likely a bug in the Executable Test Suite. Translation Argument: "+argument.toString());
+                            + "This is most likely a bug in the Executable Test Suite. Translation Argument: "
+                            + argument.toString());
                 }
-                if(argument.has("$")) {
+                if (argument.has("$")) {
                     parameterMap.put(argument.getString("token"), argument.get("$").toString());
-                }else{
-                    // The necessary information is missing in the error message. Hopefully the user will understand the error...
+                } else {
+                    // The necessary information is missing in the error message. Hopefully the user will understand the
+                    // error...
                     parameterMap.put(argument.getString("token"), "");
                 }
             }
@@ -156,17 +137,17 @@ final class EtsImpl extends Metadata implements ExecutableTestSuite {
     }
 
     @Override
-    public TestRun execute(final TestObject testObject) throws RemoteInvocationException, IncompatibleTestObjectTypes {
+    public TestRun execute(final TestObject testObject) throws RemoteInvocationException, IncompatibleTestObjectTypesException {
         return execute(testObject, null);
     }
 
     @Override
     public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
-            throws RemoteInvocationException, IncompatibleTestObjectTypes {
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException {
         if (!testObject.baseType().equals(this.baseType)) {
-            throw new IncompatibleTestObjectTypes();
+            throw new IncompatibleTestObjectTypesException();
         }
-        return this.executionContext.start(Collections.singleton(this), testObject, testRunObserver);
+        return this.etsExecutionContext.start(Collections.singleton(this), testObject, testRunObserver);
     }
 
     EidObjectMapping objectMapping() {

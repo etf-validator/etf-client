@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client;
 
@@ -26,7 +23,8 @@ import java.util.List;
 /**
  * A Test Run Result represents the execution of one or multiple ETS against one Test Object.
  *
- * It is the root result element of one or multiple {@link TestTaskResult}s. If a TestRunResult is used for iteration, the iterator will also traverse all sub results starting with the first Test Task Result.
+ * It is the root result element of one or multiple {@link TestTaskResult}s. If a TestRunResult is used for iteration,
+ * the iterator will also traverse all sub results starting with the first Test Task Result.
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */

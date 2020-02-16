@@ -93,7 +93,7 @@ repositories {
 }
 // ...
 dependencies {
-	implementation group: 'de.interactive_instruments.etf', name: 'etf-client', version: '1.0.1-SNAPSHOT'
+	implementation group: 'de.interactive_instruments.etf', name: 'etf-client', version: '1.1.0-SNAPSHOT'
 }
 ```
 
@@ -113,7 +113,7 @@ dependencies {
 		<dependency>
 		<groupId>de.interactive_instruments.etf</groupId>
 		<artifactId>etf-client</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 <!-- ... -->
@@ -133,7 +133,6 @@ settings.xml :
 	</servers>
 </settings>
 ```
-
 
 ## Sponsors
 

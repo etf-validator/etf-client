@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -178,6 +175,21 @@ class TestRunCmd implements TestRun {
         startTestRequest.put("arguments", new JSONObject());
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
+        return start(startTestRequest);
+    }
+
+    private String start(final TestRunTemplate testRuntemplate, final TestObject testObject)
+            throws RemoteInvocationException {
+        final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
+        startTestRequest.put("testRunTemplateId", testRuntemplate.eid());
+        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
+        startTestRequest.put("arguments", new JSONObject());
+        startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
+
+        return start(startTestRequest);
+    }
+
+    private String start(final JSONObject startTestRequest) throws RemoteInvocationException {
         final JsonPostRequest jsonPostRequest = new JsonPostRequest(
                 URI.create(ctx.baseUrl.toString() + "/" + PATH.substring(0, PATH.length() - 1)), ctx);
         final JSONObject testRunCreatedResponse = jsonPostRequest.post(startTestRequest);
@@ -207,7 +219,7 @@ class TestRunCmd implements TestRun {
 
     static TestRun start(final InstanceCtx ctx, final ExecutorService executor,
             final Collection<ExecutableTestSuite> selectedExecutableTestSuites,
-            final Collection<ExecutableTestSuite> allExecutableTestSuites,
+            final Iterable<ExecutableTestSuite> allExecutableTestSuites,
             final TestObject testObject,
             final TestRunObserver testRunObserver) throws RemoteInvocationException {
         final TestRunCmd testRunCmd = new TestRunCmd(ctx, testRunObserver);
@@ -215,8 +227,18 @@ class TestRunCmd implements TestRun {
         return prepareResultStructure(ctx, executor, allExecutableTestSuites, testRunCmd, eid);
     }
 
+    static TestRun start(final InstanceCtx ctx, final ExecutorService executor,
+            final TestRunTemplate selectedTestRunTemplate,
+            final Iterable<ExecutableTestSuite> allExecutableTestSuites,
+            final TestObject testObject,
+            final TestRunObserver testRunObserver) throws RemoteInvocationException {
+        final TestRunCmd testRunCmd = new TestRunCmd(ctx, testRunObserver);
+        final String eid = testRunCmd.start(selectedTestRunTemplate, testObject);
+        return prepareResultStructure(ctx, executor, allExecutableTestSuites, testRunCmd, eid);
+    }
+
     private static TestRun prepareResultStructure(final InstanceCtx ctx, final ExecutorService executor,
-            final Collection<ExecutableTestSuite> allExecutableTestSuites,
+            final Iterable<ExecutableTestSuite> allExecutableTestSuites,
             final TestRunCmd testRunCmd, final String eid) {
         final Map<String, AbstractResult.ResultCtx> etsMap = new HashMap<>();
         for (final ExecutableTestSuite executableTestSuite : allExecutableTestSuites) {

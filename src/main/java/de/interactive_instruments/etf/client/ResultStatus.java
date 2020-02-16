@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client;
 
@@ -50,14 +47,16 @@ public enum ResultStatus {
     FAILED("FAILED"),
 
     /**
-     * SKIPPED, if at least one status value is SKIPPED because a test case depends on another test case which has the status FAILED or SKIPPED
+     * SKIPPED, if at least one status value is SKIPPED because a test case depends on another test case which has the
+     * status FAILED or SKIPPED
      *
      * ordinal: 2
      */
     SKIPPED("SKIPPED"),
 
     /**
-     * NOT_APPLICABLE if at least one status value is NOT_APPLICABLE, in the case the test object does not provide the capabilities for executing the test
+     * NOT_APPLICABLE if at least one status value is NOT_APPLICABLE, in the case the test object does not provide the
+     * capabilities for executing the test
      *
      * ordinal: 3
      */
@@ -85,14 +84,16 @@ public enum ResultStatus {
     UNDEFINED("UNDEFINED"),
 
     /**
-     * PASSED_MANUAL, if at least one status value is PASSED_MANUAL (if the test is not automated and the user has to validate results manually based on instructions in the report) and all others are values are PASSED
+     * PASSED_MANUAL, if at least one status value is PASSED_MANUAL (if the test is not automated and the user has to
+     * validate results manually based on instructions in the report) and all others are values are PASSED
      *
      * ordinal: 7
      */
     PASSED_MANUAL("PASSED_MANUAL"),
 
     /**
-     * INTERNAL_ERROR, if at least one status value is INTERNAL_ERROR in the case the test engine throws an unexpected error that forces the test run to stop
+     * INTERNAL_ERROR, if at least one status value is INTERNAL_ERROR in the case the test engine throws an unexpected error
+     * that forces the test run to stop
      *
      * ordinal: 8
      */

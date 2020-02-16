@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client;
 
@@ -23,7 +20,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * The information about a started test run is updated at regular intervals and the state can be queried using the methods of this interface. Except the other methods, the {@link #result()} method blocks until the Test Run finishes.
+ * The information about a started test run is updated at regular intervals and the state can be queried using the
+ * methods of this interface. Except the other methods, the {@link #result()} method blocks until the Test Run finishes.
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
@@ -45,7 +43,7 @@ public interface TestRun extends AutoCloseable {
     double progress();
 
     /**
-     * Returns true if the Test Run has finished.
+     * Returns true if the Test Run has finished. Non-blocking call.
      *
      * @return false if Test Run has not finished yet, true otherwise
      */

@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -23,7 +20,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
 
 import de.interactive_instruments.etf.client.RemoteInvocationException;
 
@@ -32,7 +28,7 @@ import de.interactive_instruments.etf.client.RemoteInvocationException;
  */
 abstract class Request {
 
-    private final static String USER_AGENT_HEADER = "ETF Client";
+    private final static String USER_AGENT_HEADER = "ETF Client 1.1";
     private final static String ACCEPT_HEADER = "application/json";
 
     final HttpRequest.Builder requestBuilder;
@@ -40,7 +36,7 @@ abstract class Request {
 
     Request(final URI url, final InstanceCtx ctx) {
         this.requestBuilder = HttpRequest.newBuilder(url)
-                .timeout(Duration.ofMinutes(2))
+                .timeout(ctx.timeout)
                 .header("Accept", ACCEPT_HEADER)
                 .header("Accept-Language", ctx.locale.getLanguage())
                 .header("User-Agent", USER_AGENT_HEADER)
@@ -52,8 +48,7 @@ abstract class Request {
         }
     }
 
-    final void checkResponse(final HttpResponse response, final int... expectedCodes)
-            throws RemoteInvocationException {
+    final void checkResponse(final HttpResponse response, final int... expectedCodes) throws RemoteInvocationException {
         for (final int code : expectedCodes) {
             if (response.statusCode() == code) {
                 return;
