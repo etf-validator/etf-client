@@ -17,33 +17,20 @@
 package de.interactive_instruments.etf.client;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.function.Consumer;
 
 /**
- * A Test Step is the parent result element of zero or multiple {@link TestAssertionResult}s and the child of exactly
- * one {@link TestCaseResult}.
+ * An interface for results that posses messages.
  *
- * Please note: If the label of this element is set to the value "IGNORE", it will be ignored during the traversal of
- * {@link TestResult}s.
- *
- * @see TestResult#forEach(Consumer)
+ * @since 1.1
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public interface TestStepResult extends TestResultMessageHolder, TestResult {
+public interface TestResultMessageHolder {
 
     /**
-     * Additional information that are attached to this result.
+     * Return the messages that occurred during the execution of this item.
      *
-     * @return a map with the name of the attachment as key and the additional information as value
+     * @return a collection of messages or an empty collection
      */
-    Map<String, String> getAttachment();
-
-    /**
-     * Return assertion results
-     *
-     * @return assertion results or null
-     */
-    Collection<TestAssertionResult> testAssertionResults();
+    Collection<String> messages();
 }

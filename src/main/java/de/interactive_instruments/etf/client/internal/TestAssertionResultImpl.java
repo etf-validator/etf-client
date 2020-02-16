@@ -14,28 +14,36 @@
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
  */
-package de.interactive_instruments.etf.client;
+package de.interactive_instruments.etf.client.internal;
 
 import java.util.Collections;
-import java.util.Iterator;
+
+import org.json.JSONObject;
+
+import de.interactive_instruments.etf.client.TestAssertionResult;
+import de.interactive_instruments.etf.client.TestResult;
 
 /**
- * A Test Assertion Result does not possess any child result elements. It is the child of exactly one
- * {@link TestStepResult}.
- *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public interface TestAssertionResult extends TestResultMessageHolder, TestResult {
+final class TestAssertionResultImpl extends AbstractTestResultMessageHolder implements TestAssertionResult {
 
-    /**
-     * Returns an iterator that has no elements.
-     *
-     * This item does not possess any child results.
-     *
-     * @return an iterator that has no elements
-     */
+    TestAssertionResultImpl(final ResultCtx resultCtx) {
+        super(resultCtx);
+    }
+
     @Override
-    default Iterator<TestResult> iterator() {
-        return Collections.emptyIterator();
+    TestResult doCreateChild(final JSONObject childJson) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String type() {
+        return "TestAssertionResult";
+    }
+
+    @Override
+    public Iterable<? extends TestResult> children() {
+        return Collections.emptyList();
     }
 }

@@ -1,5 +1,6 @@
 /**
- * Copyright 2017-2019 European Union, interactive instruments GmbH
+ * Copyright 2019-2020 interactive instruments GmbH
+ *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
  * You may not use this work except in compliance with the Licence.
@@ -12,10 +13,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Licence for the specific language governing permissions and
  * limitations under the Licence.
- *
- * This work was supported by the EU Interoperability Solutions for
- * European Public Administrations Programme (http://ec.europa.eu/isa)
- * through Action 1.17: A Reusable INSPIRE Reference Platform (ARE3NA).
  */
 package de.interactive_instruments.etf.client.internal;
 
@@ -26,17 +23,16 @@ import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import de.interactive_instruments.etf.client.TestAssertionResult;
-import de.interactive_instruments.etf.client.TestResult;
+import de.interactive_instruments.etf.client.TestResultMessageHolder;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-final class AssertionResultImpl extends AbstractResult implements TestAssertionResult {
+abstract class AbstractTestResultMessageHolder extends AbstractResult implements TestResultMessageHolder {
 
     private final Collection<String> messages;
 
-    AssertionResultImpl(final ResultCtx resultCtx) {
+    protected AbstractTestResultMessageHolder(final ResultCtx resultCtx) {
         super(resultCtx);
         if (resultCtx.jsonObj.has("messages")) {
             final Object childrenJson = resultCtx.jsonObj.getJSONObject("messages").get("message");
@@ -55,21 +51,6 @@ final class AssertionResultImpl extends AbstractResult implements TestAssertionR
         } else {
             this.messages = Collections.emptyList();
         }
-    }
-
-    @Override
-    TestResult doCreateChild(final JSONObject childJson) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String type() {
-        return "TestAssertionResult";
-    }
-
-    @Override
-    public Iterable<? extends TestResult> children() {
-        return Collections.emptyList();
     }
 
     @Override
