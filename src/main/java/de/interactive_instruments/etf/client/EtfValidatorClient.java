@@ -73,6 +73,18 @@ public interface EtfValidatorClient {
     EtfValidatorClient locale(final Locale locale);
 
     /**
+     * Overrides the default timeout for requests, which is 3 minutes. If the response is not received within the specified
+     * timeout then an {@link RemoteInvocationException} is thrown.
+     *
+     * @since 1.1
+     *
+     * @param duration
+     *            the timeout duration
+     * @return builder object
+     */
+    EtfValidatorClient timout(final Duration duration);
+
+    /**
      * Finalize the Configuration and return an Endpoint object
      *
      * @return new Endpoint object
