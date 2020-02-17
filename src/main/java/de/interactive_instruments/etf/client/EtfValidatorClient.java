@@ -84,7 +84,7 @@ public interface EtfValidatorClient {
      *            the timeout duration
      * @return builder object
      */
-    EtfValidatorClient timout(final Duration duration);
+    EtfValidatorClient timeout(final Duration duration);
 
     /**
      * Finalize the Configuration and return an Endpoint object

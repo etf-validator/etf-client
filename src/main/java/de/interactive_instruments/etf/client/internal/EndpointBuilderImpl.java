@@ -54,7 +54,7 @@ final public class EndpointBuilderImpl implements EtfValidatorClient {
     }
 
     @Override
-    public EtfValidatorClient timout(final Duration timeout) {
+    public EtfValidatorClient timeout(final Duration timeout) {
         this.timeout = timeout;
         return this;
     }
