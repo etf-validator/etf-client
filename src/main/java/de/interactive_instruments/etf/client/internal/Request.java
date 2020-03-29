@@ -21,6 +21,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.interactive_instruments.etf.client.RemoteInvocationException;
 
 /**
@@ -30,6 +33,7 @@ abstract class Request {
 
     private final static String USER_AGENT_HEADER = "ETF Client 1.1";
     private final static String ACCEPT_HEADER = "application/json";
+    protected final Logger logger = LoggerFactory.getLogger(Request.class);
 
     final HttpRequest.Builder requestBuilder;
     final HttpClient httpClient;

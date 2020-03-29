@@ -52,7 +52,10 @@ final class JsonGetRequest extends Request {
                 .build();
         try {
             final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            checkResponse(response, 200, 204, 304);
+            checkResponse(response, 200, 204, 304, 405);
+            if (response.statusCode() == 405) {
+                logger.debug("Head operation blocked by server");
+            }
             return response.statusCode() == 304;
         } catch (final InterruptedException e) {
             throw new RemoteInvocationException(e);
