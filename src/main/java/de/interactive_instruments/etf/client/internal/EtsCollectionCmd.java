@@ -17,10 +17,7 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +42,7 @@ class EtsCollectionCmd {
         // Main collection that contains all ETS (required for resolving dependent ETS)
         private final EtsExecutionContext etsExecutionContext;
         private EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection;
+        private final RunParameters runParameters;
 
         DefaultEtsCollection(final InstanceCtx ctx, final JSONArray jsonArray,
                 final ExecutorService executor,
@@ -54,6 +52,7 @@ class EtsCollectionCmd {
             this.etsExecutionContext = new EtsExecutionContext(ctx, executor);
             initChildren(jsonArray);
             this.etsExecutionContext.injectExecutableTestSuites(this.items.values());
+            this.runParameters = mergeRunParameters(this.items.values());
         }
 
         private DefaultEtsCollection(final EtsExecutionContext etsExecutionContext,
@@ -62,6 +61,15 @@ class EtsCollectionCmd {
             super(etsExecutionContext.instanceCtx, filteredItems);
             this.etsExecutionContext = etsExecutionContext;
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
+            this.runParameters = mergeRunParameters(filteredItems);
+        }
+
+        private static RunParameters mergeRunParameters(final Iterable<ExecutableTestSuite> etss) {
+            final Map<String, String> allParameters = new HashMap<>();
+            for (final ExecutableTestSuite ets : etss) {
+                allParameters.putAll(ets.parameters().map());
+            }
+            return RunParametersImpl.init(allParameters);
         }
 
         @Override
@@ -96,13 +104,14 @@ class EtsCollectionCmd {
         }
 
         @Override
-        public TestRun execute(final TestObject testObject)
+        public TestRun execute(final TestObject testObject, final RunParameters parameters)
                 throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
-            return execute(testObject, null);
+            return execute(testObject, null, parameters);
         }
 
         @Override
-        public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+        public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver,
+                final RunParameters parameters)
                 throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
             if (this.items.isEmpty()) {
                 throw new IllegalStateException("The Executable Test Suite Collection is empty");
@@ -112,7 +121,12 @@ class EtsCollectionCmd {
                     throw new IncompatibleTestObjectTypesException();
                 }
             }
-            return etsExecutionContext.start(this.items.values(), testObject, testRunObserver);
+            return etsExecutionContext.start(this.items.values(), testObject, testRunObserver, parameters);
+        }
+
+        @Override
+        public RunParameters parameters() {
+            return this.runParameters;
         }
 
         EtsCollection inject(final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {

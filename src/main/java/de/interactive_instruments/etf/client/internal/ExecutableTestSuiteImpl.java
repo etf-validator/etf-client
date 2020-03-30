@@ -33,6 +33,7 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
     private final Collection<String> tagEids;
     private final TranslationTemplateBundle bundle;
     private final EidObjectMapping eidObjectMappings;
+    private final RunParameters runParameters;
 
     ExecutableTestSuiteImpl(final EtsExecutionContext etsExecutionContext, final JSONObject jsonObject,
             final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
@@ -85,6 +86,7 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
         mappingBuilder.add(jsonObject);
         createMappings(mappingBuilder, jsonObject, names, 0);
         eidObjectMappings = mappingBuilder.build();
+        runParameters = RunParametersImpl.init(jsonObject);
     }
 
     private void createMappings(final EidObjectMappingBuilder mappingBuilder, final JSONObject jsonObj,
@@ -137,17 +139,23 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
     }
 
     @Override
-    public TestRun execute(final TestObject testObject) throws RemoteInvocationException, IncompatibleTestObjectTypesException {
-        return execute(testObject, null);
+    public TestRun execute(final TestObject testObject, RunParameters parameters)
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException {
+        return execute(testObject, null, parameters);
     }
 
     @Override
-    public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+    public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters parameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException {
         if (!testObject.baseType().equals(this.baseType)) {
             throw new IncompatibleTestObjectTypesException();
         }
-        return this.etsExecutionContext.start(Collections.singleton(this), testObject, testRunObserver);
+        return this.etsExecutionContext.start(Collections.singleton(this), testObject, testRunObserver, parameters);
+    }
+
+    @Override
+    public RunParameters parameters() {
+        return this.runParameters;
     }
 
     EidObjectMapping objectMapping() {

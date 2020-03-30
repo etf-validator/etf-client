@@ -41,12 +41,13 @@ final class EtsExecutionContext {
     }
 
     TestRun start(final Collection<ExecutableTestSuite> selectedExecutableTestSuites,
-            final TestObject testObject, final TestRunObserver testRunObserver) throws RemoteInvocationException {
+            final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters parameters)
+            throws RemoteInvocationException {
         return TestRunCmd.start(
                 this.instanceCtx,
                 this.executor,
                 selectedExecutableTestSuites,
                 this.allExecutableTestSuites,
-                testObject, testRunObserver);
+                testObject, testRunObserver, parameters);
     }
 }

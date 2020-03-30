@@ -40,12 +40,12 @@ public class TrtExecutionContext {
     }
 
     TestRun start(final TestRunTemplate testRunTemplate, final TestObject testObject,
-            final TestRunObserver testRunObserver) throws RemoteInvocationException {
+            final TestRunObserver testRunObserver, final RunParameters parameters) throws RemoteInvocationException {
         return TestRunCmd.start(
                 this.instanceCtx,
                 this.executor,
                 testRunTemplate,
                 this.allExecutableTestSuites,
-                testObject, testRunObserver);
+                testObject, testRunObserver, parameters);
     }
 }

@@ -16,9 +16,7 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -33,6 +31,7 @@ public class TestRunTemplateImpl extends AbstractMetadata implements TestRunTemp
     private final TrtExecutionContext trtExecutionContext;
     private final TestObjectBaseType baseType;
     private final Collection<String> executableTestSuiteEids;
+    private final RunParameters runParameters;
 
     public TestRunTemplateImpl(final TrtExecutionContext trtExecutionContext, final JSONObject jsonObject,
             final EtsCollection allExecutableTestSuites,
@@ -54,9 +53,9 @@ public class TestRunTemplateImpl extends AbstractMetadata implements TestRunTemp
             throw new ReferenceError(
                     "No Executable Test Suite found for Test Run Template " + eid());
         }
-        final ExecutableTestSuite firstEts = allExecutableTestSuites.itemById(executableTestSuiteEids.iterator().next()).get();
-        this.baseType = firstEts.supportedBaseType();
-
+        final EtsCollection etsCollection = allExecutableTestSuites.itemsById(executableTestSuiteEids);
+        this.baseType = etsCollection.iterator().next().supportedBaseType();
+        this.runParameters = etsCollection.parameters();
     }
 
     @Override
@@ -70,18 +69,22 @@ public class TestRunTemplateImpl extends AbstractMetadata implements TestRunTemp
     }
 
     @Override
-    public TestRun execute(final TestObject testObject)
+    public TestRun execute(final TestObject testObject, final RunParameters parameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
-        return execute(testObject, null);
+        return execute(testObject, null, parameters);
     }
 
     @Override
-    public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+    public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters parameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
-
         if (!testObject.baseType().equals(this.baseType)) {
             throw new IncompatibleTestObjectTypesException();
         }
-        return this.trtExecutionContext.start(this, testObject, testRunObserver);
+        return this.trtExecutionContext.start(this, testObject, testRunObserver, parameters);
+    }
+
+    @Override
+    public RunParameters parameters() {
+        return runParameters;
     }
 }

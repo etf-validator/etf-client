@@ -40,7 +40,32 @@ public interface TestRunExecutable {
      * @throws IllegalStateException
      *             when the method is invoked on an empty ETS collection
      */
-    TestRun execute(final TestObject testObject)
+    @Deprecated
+    default TestRun execute(final TestObject testObject)
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+        return execute(testObject, (RunParameters) null);
+    }
+
+    /**
+     * Start a new Test Run.
+     *
+     * The Client of this API can call the blocking {@link TestRun#result()} } method to wait for the result
+     *
+     * @param testObject
+     *            the Test Object to use
+     * @param runParameters
+     *            the Parameters for the Test Run
+     *
+     * @return an object representing the Test Run
+     *
+     * @throws RemoteInvocationException
+     *             if the ETF instance returned an error
+     * @throws IncompatibleTestObjectTypesException
+     *             when the Test Object Type and the types supported by the ETS are incompatible
+     * @throws IllegalStateException
+     *             when the method is invoked on an empty ETS collection
+     */
+    TestRun execute(final TestObject testObject, final RunParameters runParameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException;
 
     /**
@@ -63,6 +88,41 @@ public interface TestRunExecutable {
      * @throws IllegalStateException
      *             when the method is invoked on an empty ETS collection
      */
-    TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+    @Deprecated
+    default TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+        return execute(testObject, testRunObserver, null);
+    }
+
+    /**
+     * Start a new Test Run.
+     *
+     * The Client of the API can implement the {@link TestRunObserver} interface and pass a object that will be called when
+     * the Test Run has finished.
+     *
+     * @param testObject
+     *            the Test Object to use
+     * @param testRunObserver
+     *            an Object that implements a callback interface
+     * @param runParameters
+     *            the Parameters for the Test Run
+     *
+     * @return an object representing the Test Run
+     *
+     * @throws RemoteInvocationException
+     *             if the ETF instance returned an error
+     * @throws IncompatibleTestObjectTypesException
+     *             when the Test Object Type and the types supported by the ETS are incompatible
+     * @throws IllegalStateException
+     *             when the method is invoked on an empty ETS collection
+     */
+    TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters runParameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException;
+
+    /**
+     * Get applicable Run Parameters
+     *
+     * @return Test Run Parameters
+     */
+    RunParameters parameters();
 }

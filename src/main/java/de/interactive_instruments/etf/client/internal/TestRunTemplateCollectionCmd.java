@@ -43,6 +43,8 @@ public class TestRunTemplateCollectionCmd {
         private EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection;
         private EtsCollection etsCollection;
 
+        private
+
         DefaultTestRunTemplateCollection(final InstanceCtx ctx, final JSONArray jsonArray,
                 final ExecutorService executor,
                 final EtsCollection etsCollection,
@@ -61,13 +63,14 @@ public class TestRunTemplateCollectionCmd {
         }
 
         @Override
-        public TestRun execute(final TestObject testObject)
+        public TestRun execute(final TestObject testObject, final RunParameters parameters)
                 throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
-            return execute(testObject, null);
+            return execute(testObject, null, parameters);
         }
 
         @Override
-        public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
+        public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver,
+                final RunParameters parameters)
                 throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
             if (this.items.isEmpty()) {
                 throw new IllegalStateException("The Executable Test Suite Collection is empty");
@@ -80,7 +83,12 @@ public class TestRunTemplateCollectionCmd {
             if (!testObject.baseType().equals(trt.supportedBaseType())) {
                 throw new IncompatibleTestObjectTypesException();
             }
-            return trtExecutionContext.start(trt, testObject, testRunObserver);
+            return trtExecutionContext.start(trt, testObject, testRunObserver, parameters);
+        }
+
+        @Override
+        public RunParameters parameters() {
+            return this.etsCollection.parameters();
         }
 
         EtfCollection<TestRunTemplate> inject(final EtsCollection etsCollection,

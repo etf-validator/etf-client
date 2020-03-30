@@ -165,25 +165,34 @@ class TestRunCmd implements TestRun {
         return this.logEntries;
     }
 
-    private String start(final Collection<ExecutableTestSuite> executableTestSuites, final TestObject testObject)
+    private String start(final Collection<ExecutableTestSuite> executableTestSuites, final TestObject testObject,
+            final RunParameters parameters)
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
         final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ItemMetadata::eid)
                 .collect(Collectors.toList());
         startTestRequest.put("executableTestSuiteIds", executableTestSuiteIds);
-        startTestRequest.put("arguments", new JSONObject());
+        if (parameters == null) {
+            startTestRequest.put("arguments", new JSONObject());
+        } else {
+            startTestRequest.put("arguments", parameters.map());
+        }
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
         return start(startTestRequest);
     }
 
-    private String start(final TestRunTemplate testRuntemplate, final TestObject testObject)
+    private String start(final TestRunTemplate testRuntemplate, final TestObject testObject, final RunParameters parameters)
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.put("testRunTemplateId", testRuntemplate.eid());
         startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
-        startTestRequest.put("arguments", new JSONObject());
+        if (parameters == null) {
+            startTestRequest.put("arguments", new JSONObject());
+        } else {
+            startTestRequest.put("arguments", parameters.map());
+        }
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
         return start(startTestRequest);
@@ -221,9 +230,10 @@ class TestRunCmd implements TestRun {
             final Collection<ExecutableTestSuite> selectedExecutableTestSuites,
             final Iterable<ExecutableTestSuite> allExecutableTestSuites,
             final TestObject testObject,
-            final TestRunObserver testRunObserver) throws RemoteInvocationException {
+            final TestRunObserver testRunObserver,
+            final RunParameters parameters) throws RemoteInvocationException {
         final TestRunCmd testRunCmd = new TestRunCmd(ctx, testRunObserver);
-        final String eid = testRunCmd.start(selectedExecutableTestSuites, testObject);
+        final String eid = testRunCmd.start(selectedExecutableTestSuites, testObject, parameters);
         return prepareResultStructure(ctx, executor, allExecutableTestSuites, testRunCmd, eid);
     }
 
@@ -231,9 +241,10 @@ class TestRunCmd implements TestRun {
             final TestRunTemplate selectedTestRunTemplate,
             final Iterable<ExecutableTestSuite> allExecutableTestSuites,
             final TestObject testObject,
-            final TestRunObserver testRunObserver) throws RemoteInvocationException {
+            final TestRunObserver testRunObserver,
+            final RunParameters parameters) throws RemoteInvocationException {
         final TestRunCmd testRunCmd = new TestRunCmd(ctx, testRunObserver);
-        final String eid = testRunCmd.start(selectedTestRunTemplate, testObject);
+        final String eid = testRunCmd.start(selectedTestRunTemplate, testObject, parameters);
         return prepareResultStructure(ctx, executor, allExecutableTestSuites, testRunCmd, eid);
     }
 

@@ -24,6 +24,7 @@ import de.interactive_instruments.etf.client.*;
 
 /**
  * There is not yet a public instance that supports this version 2.1 feature
+ *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
 public class TestRunTemplateTest {
