@@ -78,4 +78,11 @@ public interface RunParameters {
      * @return immutable String Map
      */
     Map<String, String> map();
+
+    /**
+     * The names of the parameters that the client must set
+     *
+     * @return immutable String Set
+     */
+    Set<String> required();
 }

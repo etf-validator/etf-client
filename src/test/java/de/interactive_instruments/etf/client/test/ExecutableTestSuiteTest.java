@@ -141,7 +141,7 @@ public class ExecutableTestSuiteTest {
 
         final EtsCollection metadataEtss = etfEndpoint.executableTestSuites().itemsByTag(metadataTag);
         assertNotNull(metadataEtss);
-        assertEquals(8, metadataEtss.size());
+        assertEquals(9, metadataEtss.size());
 
         boolean etsFound1 = false;
         boolean etsFound2 = false;

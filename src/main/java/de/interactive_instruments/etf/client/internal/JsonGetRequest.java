@@ -42,6 +42,10 @@ final class JsonGetRequest extends Request {
         return this.requestBuilder.copy().headers("If-Modified-Since", ifModifiedSinceValue);
     }
 
+    private HttpRequest.Builder newBuilder() {
+        return this.requestBuilder.copy();
+    }
+
     /**
      * Send request with If-Modified-Since header and compare results
      *
@@ -65,7 +69,7 @@ final class JsonGetRequest extends Request {
     }
 
     synchronized JSONObject query() throws RemoteInvocationException {
-        final HttpRequest request = newBuilderWithConditionalRequest().GET().build();
+        final HttpRequest request = newBuilder().GET().build();
         final HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
         HttpResponse<String> response = null;
         try {

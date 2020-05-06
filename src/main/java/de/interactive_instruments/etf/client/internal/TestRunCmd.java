@@ -173,11 +173,8 @@ class TestRunCmd implements TestRun {
         final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ItemMetadata::eid)
                 .collect(Collectors.toList());
         startTestRequest.put("executableTestSuiteIds", executableTestSuiteIds);
-        if (parameters == null) {
-            startTestRequest.put("arguments", new JSONObject());
-        } else {
-            startTestRequest.put("arguments", parameters.map());
-        }
+        startTestRequest.put("arguments",
+                RunParametersImpl.toJson(parameters, EtsCollectionCmd.mergeRunParameters(executableTestSuites)));
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
         return start(startTestRequest);
@@ -188,11 +185,7 @@ class TestRunCmd implements TestRun {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.put("testRunTemplateId", testRuntemplate.eid());
         startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
-        if (parameters == null) {
-            startTestRequest.put("arguments", new JSONObject());
-        } else {
-            startTestRequest.put("arguments", parameters.map());
-        }
+        startTestRequest.put("arguments", RunParametersImpl.toJson(parameters, testRuntemplate.parameters()));
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
         return start(startTestRequest);

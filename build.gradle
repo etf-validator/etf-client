@@ -9,12 +9,14 @@
 buildscript {
     repositories {
         maven {
-            url "http://services.interactive-instruments.de/etfdev-af/plugins-releases-local"
+            url "https://af.etf.interactive-instruments.de/repository/gradle-plugins"
             credentials {
-              // Our repository requires authenticating
-              username 'ii-bda'
-              password 'AP7mb4WA6F1ckdZkaE8Qx8GSowt'
+                username 'ii-bda'
+                password 'AP7mb4WA6F1ckdZkaE8Qx8GSowt'
             }}
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
     }
     dependencies {
         classpath group: 'de.interactive_instruments.bda', name: 'etf-bda', version: '[2.0.8,2.0.99]'

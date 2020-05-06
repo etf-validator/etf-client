@@ -64,14 +64,6 @@ class EtsCollectionCmd {
             this.runParameters = mergeRunParameters(filteredItems);
         }
 
-        private static RunParameters mergeRunParameters(final Iterable<ExecutableTestSuite> etss) {
-            final Map<String, String> allParameters = new HashMap<>();
-            for (final ExecutableTestSuite ets : etss) {
-                allParameters.putAll(ets.parameters().map());
-            }
-            return RunParametersImpl.init(allParameters);
-        }
-
         @Override
         ExecutableTestSuite doPrepare(final JSONObject jsonObject) {
             return new ExecutableTestSuiteImpl(this.etsExecutionContext, jsonObject, this.translationTemplateBundleCollection);
@@ -133,6 +125,14 @@ class EtsCollectionCmd {
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
             return this;
         }
+    }
+
+    static RunParameters mergeRunParameters(final Iterable<ExecutableTestSuite> etss) {
+        final Collection<RunParameters> allParameters = new ArrayList<>();
+        for (final ExecutableTestSuite ets : etss) {
+            allParameters.add(ets.parameters());
+        }
+        return RunParametersImpl.merge(allParameters);
     }
 
     private final JsonGetRequest apiCall;

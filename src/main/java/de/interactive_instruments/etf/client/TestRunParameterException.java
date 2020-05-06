@@ -17,14 +17,12 @@
 package de.interactive_instruments.etf.client;
 
 /**
- * Thrown if the feature is not supported by the remote instance.
+ * Thrown if a parameter-related error has occurred.
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class FeatureNotSupportedException extends IllegalStateException {
-
-    public FeatureNotSupportedException(final String currentVersion, final String requiredVersion) {
-        super("This Feature is not supported by the remote ETF instance (version '" + currentVersion + "'). At least version '"
-                + requiredVersion + "' is required.");
+public class TestRunParameterException extends IllegalArgumentException {
+    public TestRunParameterException(final String message) {
+        super(message);
     }
 }

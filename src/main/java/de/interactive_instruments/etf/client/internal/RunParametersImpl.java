@@ -24,6 +24,7 @@ import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.ReferenceError;
 import de.interactive_instruments.etf.client.RunParameters;
+import de.interactive_instruments.etf.client.TestRunParameterException;
 
 /**
  *
@@ -33,17 +34,57 @@ import de.interactive_instruments.etf.client.RunParameters;
 public class RunParametersImpl implements RunParameters {
 
     final Map<String, String> parameters;
+    // in ETF a parameter can be required and/or static.
+    // In this simplified model static and required parameters are not required
+    final Set<String> required;
+    final Set<String> statics;
 
-    private RunParametersImpl(final Map<String, String> parameters) {
-        this.parameters = new HashMap<>(parameters);
+    private RunParametersImpl(final Map<String, String> map, final Set<String> required, final Set<String> statics) {
+        this.parameters = new HashMap<>(Objects.requireNonNullElse(map, Collections.EMPTY_MAP));
+        final Set<String> cleanRequired = new HashSet<>(required);
+        cleanRequired.removeAll(statics);
+        this.required = cleanRequired;
+        this.statics = statics;
     }
 
-    static RunParametersImpl init(final Map<String, String> map) {
-        return new RunParametersImpl(Objects.requireNonNullElse(map, Collections.EMPTY_MAP));
+    private RunParametersImpl(final RunParametersImpl current, final Map<String, String> parameters) {
+        this(merge(current, parameters), current.required, current.statics);
+    }
+
+    static Map<String, String> merge(final RunParametersImpl current, final Map<String, String> parameters) {
+        final Map<String, String> mergedMap = new HashMap<>(current.map());
+        final Map<String, String> currentParams = current.map();
+        for (final Map.Entry<String, String> kvP : parameters.entrySet()) {
+            if (current.statics().contains(kvP.getKey())) {
+                throw new ReferenceError("You can not overwrite the static parameter '" + kvP.getKey() + "'");
+            }
+            if (!currentParams.containsKey(kvP.getKey())) {
+                throw new ReferenceError("The referenced Parameter '" + kvP.getKey() + "' is unknown");
+            }
+            if (!current.statics.contains(kvP.getKey())) {
+                mergedMap.put(kvP.getKey(), kvP.getValue());
+            }
+        }
+        return mergedMap;
+    }
+
+    static RunParameters merge(final Iterable<RunParameters> parameters) {
+        final Map<String, String> allParams = new HashMap<>();
+        final Set<String> allRequired = new HashSet<>();
+        final Set<String> allStatics = new HashSet<>();
+        for (final RunParameters parameter : parameters) {
+            allParams.putAll(parameter.map());
+            allRequired.addAll(parameter.required());
+            allStatics.addAll(((RunParametersImpl) parameter).statics());
+        }
+        allStatics.forEach(allParams::remove);
+        return new RunParametersImpl(allParams, allRequired, allStatics);
     }
 
     static RunParameters init(final JSONObject jsonObject) {
         if (jsonObject.has("ParameterList") && !jsonObject.isNull("ParameterList")) {
+            final Set<String> allRequired = new HashSet<>();
+            final Set<String> allStatics = new HashSet<>();
             final Map<String, String> parameterKvp;
             final Object parameters = jsonObject.getJSONObject("ParameterList").get("parameter");
             if (parameters instanceof JSONObject) {
@@ -53,7 +94,11 @@ public class RunParametersImpl implements RunParameters {
                     parameterKvp = Collections.singletonMap(
                             parameter.getString("name"),
                             def != null ? def.toString() : null);
+                    if (def == null && parameter.optBoolean("required")) {
+                        allRequired.add(parameter.getString("name"));
+                    }
                 } else {
+                    allStatics.add(parameter.getString("name"));
                     parameterKvp = Collections.emptyMap();
                 }
             } else if (parameters instanceof JSONArray) {
@@ -65,26 +110,42 @@ public class RunParametersImpl implements RunParameters {
                         parameterKvp.put(
                                 parameter.getString("name"),
                                 def != null ? def.toString() : null);
+                        if (def == null && parameter.optBoolean("required")) {
+                            allRequired.add(parameter.getString("name"));
+                        }
+                    } else {
+                        allStatics.add(parameter.getString("name"));
                     }
                 }
             } else {
                 parameterKvp = Collections.emptyMap();
             }
-            return RunParametersImpl.init(parameterKvp);
+            return new RunParametersImpl(parameterKvp, allRequired, allStatics);
         }
-        return RunParametersImpl.init(Collections.emptyMap());
+        return new RunParametersImpl(Collections.emptyMap(), Collections.emptySet(), Collections.emptySet());
     }
 
-    private RunParametersImpl(final RunParametersImpl current, final Map<String, String> parameters) {
-        final Map<String, String> currentParams = current.map();
-        final Map<String, String> mergedMap = new HashMap<>(current.map());
-        for (final Map.Entry<String, String> kvP : parameters.entrySet()) {
-            if (!currentParams.containsKey(kvP.getKey())) {
-                throw new ReferenceError("The referenced Parameter '" + kvP.getKey() + "' is unknown");
+    static Object toJson(final RunParameters actualParameters, final RunParameters referenceParameters) {
+        if (actualParameters == null) {
+            if (referenceParameters.required().isEmpty()) {
+                return new JSONObject();
+            } else {
+                throw new TestRunParameterException("The required Test Run Parameters are not set: " +
+                        String.join(", ", referenceParameters.required()));
             }
-            mergedMap.put(kvP.getKey(), kvP.getValue());
+        } else {
+            final Set<String> missing = new HashSet<>();
+            for (final String required : referenceParameters.required()) {
+                if (actualParameters.map().get(required) == null) {
+                    missing.add(required);
+                }
+            }
+            if (!missing.isEmpty()) {
+                throw new TestRunParameterException("The required Test Run Parameters are not set: " +
+                        String.join(", ", missing));
+            }
+            return actualParameters.map();
         }
-        this.parameters = mergedMap;
     }
 
     public RunParameters setFrom(final Map<String, String> map) {
@@ -123,4 +184,14 @@ public class RunParametersImpl implements RunParameters {
     public Map<String, String> map() {
         return Collections.unmodifiableMap(this.parameters);
     }
+
+    @Override
+    public Set<String> required() {
+        return this.required;
+    }
+
+    Set<String> statics() {
+        return this.statics;
+    }
+
 }

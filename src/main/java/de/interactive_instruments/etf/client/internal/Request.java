@@ -31,7 +31,7 @@ import de.interactive_instruments.etf.client.RemoteInvocationException;
  */
 abstract class Request {
 
-    private final static String USER_AGENT_HEADER = "ETF Client 1.1";
+    private final static String USER_AGENT_HEADER = "ETF Client 1.2";
     private final static String ACCEPT_HEADER = "application/json";
     protected final Logger logger = LoggerFactory.getLogger(Request.class);
 

@@ -55,7 +55,12 @@ public class TestRunTemplateImpl extends AbstractMetadata implements TestRunTemp
         }
         final EtsCollection etsCollection = allExecutableTestSuites.itemsById(executableTestSuiteEids);
         this.baseType = etsCollection.iterator().next().supportedBaseType();
-        this.runParameters = etsCollection.parameters();
+
+        final RunParameters testRunTemplateParameter = RunParametersImpl.init(jsonObject);
+        final List<RunParameters> allParameters = new ArrayList<>();
+        allParameters.add(testRunTemplateParameter);
+        allParameters.add(etsCollection.parameters());
+        this.runParameters = RunParametersImpl.merge(allParameters);
     }
 
     @Override
