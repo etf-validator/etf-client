@@ -17,6 +17,7 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.json.JSONObject;
 
@@ -45,6 +46,11 @@ class TestTaskResultImpl extends AbstractResult implements TestTaskResult {
     @Override
     public Collection<TestModuleResult> testModuleResults() {
         return this.testModuleResults;
+    }
+
+    @Override
+    public Optional<String> internalError() {
+        return Optional.ofNullable(resultCtx.jsonObj.optString("errorMessage", null));
     }
 
     @Override

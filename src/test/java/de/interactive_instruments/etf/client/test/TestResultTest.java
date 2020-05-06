@@ -57,6 +57,11 @@ public class TestResultTest {
             final TestRunResult result = testRun.result();
             assertEquals(testRun.progress(), 1.0);
             for (final TestResult testResult : result) {
+
+                if (testResult instanceof TestTaskResult) {
+                    assertTrue(((TestTaskResult) testResult).internalError().isEmpty());
+                }
+
                 assertNotNull(testResult.label());
                 assertNotNull(testResult.description());
                 assertTrue(testResult.duration() >= 0);

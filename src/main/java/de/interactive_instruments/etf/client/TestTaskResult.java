@@ -17,9 +17,10 @@
 package de.interactive_instruments.etf.client;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
- * A Test Task Result represents the result of executing exactlyone ETS against one Test Object.
+ * A Test Task Result represents the result of executing exactly one ETS against one Test Object.
  *
  * It is the parent result element of one or multiple {@link TestModuleResult}s and the child of exactly one
  * {@link TestRunResult}.
@@ -35,4 +36,10 @@ public interface TestTaskResult extends TestResult {
      */
     Collection<TestModuleResult> testModuleResults();
 
+    /**
+     * If an internal error has occurred, a container is returned with an error message, otherwise the container is empty.
+     *
+     * @return error message or empty
+     */
+    Optional<String> internalError();
 }
