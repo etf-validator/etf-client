@@ -37,9 +37,10 @@ public interface TestTaskResult extends TestResult {
     Collection<TestModuleResult> testModuleResults();
 
     /**
-     * If an internal error has occurred, a container is returned with an error message, otherwise the container is empty.
+     * If internal errors occurred, a container is returned with the error messages,
+     * otherwise the container is empty.
      *
      * @return error message or empty
      */
-    Optional<String> internalError();
+    Optional<Collection<String>> internalErrors();
 }

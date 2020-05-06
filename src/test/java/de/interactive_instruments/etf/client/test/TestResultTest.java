@@ -59,7 +59,7 @@ public class TestResultTest {
             for (final TestResult testResult : result) {
 
                 if (testResult instanceof TestTaskResult) {
-                    assertTrue(((TestTaskResult) testResult).internalError().isEmpty());
+                    assertTrue(((TestTaskResult) testResult).internalErrors().isEmpty());
                 }
 
                 assertNotNull(testResult.label());
