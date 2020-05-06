@@ -1,7 +1,7 @@
 # ETF Java Client Library
 
 [![European Union Public Licence 1.2](https://img.shields.io/badge/license-EUPL%201.2-blue.svg)](https://joinup.ec.europa.eu/software/page/eupl)
-[![API JavaDoc](http://img.shields.io/badge/JavaDoc-API-green.svg)](https://interactive-instruments.github.io/etf-client/javadoc/index.html)
+[![API JavaDoc](http://img.shields.io/badge/JavaDoc-API-green.svg)](https://etf-validator.github.io/etf-client/javadoc/index.html)
 
 
 The ETF Java Client library provides functionality to:
@@ -48,7 +48,7 @@ for (final TestResult testResult : result) {
 
 ```
 
-See the API [documentation](https://interactive-instruments.github.io/etf-client/javadoc/index.html) for additional details.
+See the API [documentation](https://etf-validator.github.io/etf-client/javadoc/index.html) for additional details.
 
 ## Mapping the results to your own model
 
@@ -71,7 +71,7 @@ structure includes all sub-elements in the result during iteration.
 ### Result Status Codes
 
 The result status codes are describe
-[here](https://interactive-instruments.github.io/etf-client/javadoc/de/interactive_instruments/etf/client/ResultStatus.html#PASSED).
+[here](https://etf-validator.github.io/etf-client/javadoc/de/interactive_instruments/etf/client/ResultStatus.html#PASSED).
 
 
 ## Getting the library
