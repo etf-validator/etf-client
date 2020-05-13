@@ -31,7 +31,7 @@ import de.interactive_instruments.etf.client.Tag;
 public class TagTest {
 
     public final static String METADATA_TAG_ID = "EIDc6567beb-fc33-4f2e-865d-0c3ee5b3d1ae";
-    private static final String METADATA_TAG_LABEL = "Metadata (TG version 2.0) - BETA";
+    private static final String METADATA_TAG_LABEL = "Metadata (TG version 2.0)";
 
     @Test
     void findTagInCollection() throws RemoteInvocationException {

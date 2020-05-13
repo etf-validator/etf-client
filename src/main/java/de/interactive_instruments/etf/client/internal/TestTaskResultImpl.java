@@ -18,8 +18,9 @@ package de.interactive_instruments.etf.client.internal;
 
 import java.util.*;
 
-import de.interactive_instruments.etf.client.*;
 import org.json.JSONObject;
+
+import de.interactive_instruments.etf.client.*;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -46,15 +47,16 @@ class TestTaskResultImpl extends AbstractResult implements TestTaskResult {
 
     @Override
     public Optional<Collection<String>> internalErrors() {
-        if(resultCtx.jsonObj.has("errorMessage")) {
+        if (resultCtx.jsonObj.has("errorMessage")) {
             return Optional.of(Collections.singletonList(resultCtx.jsonObj.getString("errorMessage")));
         }
-        if(resultStatus().equals(ResultStatus.INTERNAL_ERROR)) {
+        if (resultStatus().equals(ResultStatus.INTERNAL_ERROR)) {
             final Set<String> errors = new LinkedHashSet<>();
-            int c=0;
-            for(TestResult subResult:  this) {
-                if(subResult.resultStatus().equals(ResultStatus.INTERNAL_ERROR) && subResult instanceof TestResultMessageHolder) {
-                    errors.add(++c+" - Internal error in "+subResult.label());
+            int c = 0;
+            for (TestResult subResult : this) {
+                if (subResult.resultStatus().equals(ResultStatus.INTERNAL_ERROR)
+                        && subResult instanceof TestResultMessageHolder) {
+                    errors.add(++c + " - Internal error in " + subResult.label());
                     errors.addAll(((TestResultMessageHolder) subResult).messages());
                 }
             }

@@ -16,7 +16,10 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.json.JSONObject;
 
@@ -30,12 +33,45 @@ import de.interactive_instruments.etf.client.TestStepResult;
 class TestCaseResultImpl extends AbstractResult implements TestCaseResult {
 
     private final Collection<TestStepResult> testStepResults;
+    private final static String TEST_STEP_RESULT = "TestStepResult";
+    private final static String TEST_STEP_RESULTS = "testStepResults";
+    private final static String INVOKED_TESTS = "invokedTests";
 
     TestCaseResultImpl(final ResultCtx resultCtx) {
         super(resultCtx);
 
-        testStepResults = (Collection<TestStepResult>) createChildren(
-                resultCtx.jsonObj, "testStepResults", "TestStepResult");
+        testStepResults = (Collection<TestStepResult>) createTestStepResults(resultCtx.jsonObj);
+    }
+
+    private Collection<? extends TestResult> createTestStepResults(final JSONObject jsonObj) {
+        if (jsonObj.isNull(TEST_STEP_RESULTS)) {
+            return Collections.emptyList();
+        }
+        final Collection<JSONObject> childCollection = new JSONObjectOrArray(jsonObj.getJSONObject(TEST_STEP_RESULTS))
+                .get(TEST_STEP_RESULT);
+        final List<TestResult> testStepResults = new ArrayList<>();
+        for (final JSONObject child : childCollection) {
+            if (!child.isNull("resultedFrom") && !child.getJSONObject("resultedFrom").isNull("ref")) {
+                testStepResults.add(doCreateChild(child));
+                if (!child.isNull("invokedTests")) {
+                    testStepResults.addAll(invokedTestStepResults(child));
+                }
+            }
+        }
+        return testStepResults;
+    }
+
+    private Collection<? extends TestResult> invokedTestStepResults(final JSONObject jsonObj) {
+        final List<TestResult> invokedTestStepResults = new ArrayList<>();
+        final Collection<JSONObject> invokedTests = new JSONObjectOrArray(jsonObj.getJSONObject(INVOKED_TESTS))
+                .get(TEST_STEP_RESULT);
+        for (final JSONObject invokedTest : invokedTests) {
+            invokedTestStepResults.add(doCreateChild(invokedTest));
+            if (!invokedTest.isNull("invokedTests")) {
+                invokedTestStepResults.addAll(invokedTestStepResults(invokedTest));
+            }
+        }
+        return invokedTestStepResults;
     }
 
     @Override
