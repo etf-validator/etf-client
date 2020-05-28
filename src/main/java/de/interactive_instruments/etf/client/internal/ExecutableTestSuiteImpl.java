@@ -17,11 +17,14 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.*;
+
+import static java.util.regex.Pattern.CASE_INSENSITIVE;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -34,6 +37,7 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
     private final TranslationTemplateBundle bundle;
     private final EidObjectMapping eidObjectMappings;
     private final RunParameters runParameters;
+    private final static Pattern floatingTokensPattern = Pattern.compile(".*coord.*|.*distance.*|.*height.*|.*meter.*", CASE_INSENSITIVE);
 
     ExecutableTestSuiteImpl(final EtsExecutionContext etsExecutionContext, final JSONObject jsonObject,
             final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
@@ -125,7 +129,19 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
                             + argument.toString());
                 }
                 if (argument.has("$")) {
-                    parameterMap.put(argument.getString("token"), argument.get("$").toString());
+                    final Object vO = argument.get("$");
+                    final String token = argument.getString("token");
+                    final String value;
+                    if(vO instanceof Number) {
+                        if(vO instanceof Double || vO instanceof Float || floatingTokensPattern.matcher(token).matches()) {
+                            value = etsExecutionContext.instanceCtx.floatFormat.format(vO);
+                        }else{
+                            value = vO.toString();
+                        }
+                    }else{
+                        value = vO.toString();
+                    }
+                    parameterMap.put(token, value);
                 } else {
                     // The necessary information is missing in the error message. Hopefully the user will understand the
                     // error...

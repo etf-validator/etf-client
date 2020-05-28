@@ -18,6 +18,8 @@ package de.interactive_instruments.etf.client.internal;
 
 import java.net.Authenticator;
 import java.net.URI;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.UUID;
@@ -34,6 +36,7 @@ final class InstanceCtx {
     final Duration timeout;
     final String sessionId;
     final AtomicInteger requestNo = new AtomicInteger(1);
+    final DecimalFormat floatFormat = new DecimalFormat("0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 
     InstanceCtx(final URI baseUrl, final Authenticator auth, final Locale locale, final Duration timeout) {
         this.baseUrl = baseUrl;
