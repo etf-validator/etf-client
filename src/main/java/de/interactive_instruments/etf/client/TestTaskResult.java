@@ -42,4 +42,11 @@ public interface TestTaskResult extends TestResult {
      * @return error message or empty
      */
     Optional<Collection<String>> internalErrors();
+
+    /**
+     * The ID of the Executable Test Suite that generated this result.
+     *
+     * @return Executable Test Suite ID
+     */
+    String executableTestSuiteEid();
 }

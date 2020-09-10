@@ -28,11 +28,13 @@ import de.interactive_instruments.etf.client.*;
 class TestTaskResultImpl extends AbstractResult implements TestTaskResult {
 
     private final Collection<TestModuleResult> testModuleResults;
+    private final String etsId;
 
     TestTaskResultImpl(final ResultCtx resultCtx) {
         super(resultCtx.withAttachments());
         testModuleResults = (Collection<TestModuleResult>) createChildren(
                 resultCtx.jsonObj, "testModuleResults", "TestModuleResult");
+        this.etsId = this.resultCtx.jsonObj.getJSONObject("resultedFrom").getString("ref");
     }
 
     @Override
@@ -68,6 +70,11 @@ class TestTaskResultImpl extends AbstractResult implements TestTaskResult {
     @Override
     public String type() {
         return "TestTaskResult";
+    }
+
+    @Override
+    public String executableTestSuiteEid() {
+        return this.etsId;
     }
 
     @Override
