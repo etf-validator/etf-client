@@ -34,6 +34,7 @@ class TestCaseResultImpl extends AbstractResult implements TestCaseResult {
 
     private final Collection<TestStepResult> testStepResults;
     private final static String TEST_STEP_RESULT = "TestStepResult";
+    private final static String TEST_CASE_RESULT = "TestCaseResult";
     private final static String TEST_STEP_RESULTS = "testStepResults";
     private final static String INVOKED_TESTS = "invokedTests";
 
@@ -63,9 +64,24 @@ class TestCaseResultImpl extends AbstractResult implements TestCaseResult {
 
     private Collection<? extends TestResult> invokedTestStepResults(final JSONObject jsonObj) {
         final List<TestResult> invokedTestStepResults = new ArrayList<>();
-        final Collection<JSONObject> invokedTests = new JSONObjectOrArray(jsonObj.getJSONObject(INVOKED_TESTS))
-                .get(TEST_STEP_RESULT);
-        for (final JSONObject invokedTest : invokedTests) {
+        final JSONObjectOrArray invokedTests = new JSONObjectOrArray(jsonObj.getJSONObject(INVOKED_TESTS));
+        final Collection<JSONObject> invokedTestStepResultCollection;
+        if(invokedTests.has(TEST_STEP_RESULT)) {
+            invokedTestStepResultCollection = invokedTests.get(TEST_STEP_RESULT);
+        }else if(invokedTests.has(TEST_CASE_RESULT)) {
+            final Collection<JSONObject> testCaseResults = invokedTests.get(TEST_CASE_RESULT);
+            invokedTestStepResultCollection = new ArrayList<>();
+            for (final JSONObject testCaseResult : testCaseResults) {
+                if(testCaseResult.has(TEST_STEP_RESULTS)) {
+                    final Collection<JSONObject> testStepSubCollection = new JSONObjectOrArray(
+                            testCaseResult.getJSONObject(TEST_STEP_RESULTS)).get(TEST_STEP_RESULT);
+                    invokedTestStepResultCollection.addAll(testStepSubCollection);
+                }
+            }
+        }else{
+            invokedTestStepResultCollection = Collections.EMPTY_LIST;
+        }
+        for (final JSONObject invokedTest : invokedTestStepResultCollection) {
             invokedTestStepResults.add(doCreateChild(invokedTest));
             if (!invokedTest.isNull("invokedTests")) {
                 invokedTestStepResults.addAll(invokedTestStepResults(invokedTest));
@@ -86,7 +102,7 @@ class TestCaseResultImpl extends AbstractResult implements TestCaseResult {
 
     @Override
     public String type() {
-        return "TestCaseResult";
+        return TEST_CASE_RESULT;
     }
 
     @Override

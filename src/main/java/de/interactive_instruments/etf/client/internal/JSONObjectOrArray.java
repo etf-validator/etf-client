@@ -49,4 +49,8 @@ class JSONObjectOrArray {
             return Collections.EMPTY_LIST;
         }
     }
+
+    public boolean has(final String name) {
+        return jsonObject.has(name);
+    }
 }
