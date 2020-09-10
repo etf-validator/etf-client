@@ -16,6 +16,8 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
+import java.util.Optional;
+
 import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.ItemMetadata;
@@ -28,11 +30,13 @@ abstract class AbstractMetadata implements ItemMetadata {
     private final String eid;
     private final String label;
     private final String description;
+    private final String version;
 
     AbstractMetadata(final JSONObject jsonObject) {
         eid = jsonObject.getString("id");
         label = jsonObject.getString("label");
-        description = jsonObject.has("description") ? jsonObject.getString("label") : "";
+        description = jsonObject.has("description") ? jsonObject.getString("description") : "";
+        version = jsonObject.has("version") ? jsonObject.getString("version") : null;
     }
 
     final public String eid() {
@@ -45,6 +49,10 @@ abstract class AbstractMetadata implements ItemMetadata {
 
     final public String description() {
         return description;
+    }
+
+    final public Optional<String> version() {
+        return Optional.ofNullable(version);
     }
 
     @Override

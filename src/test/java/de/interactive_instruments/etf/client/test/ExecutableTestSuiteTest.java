@@ -52,6 +52,7 @@ public class ExecutableTestSuiteTest {
                 etsFound = true;
                 assertEquals(ETS_ID, ets.eid());
                 assertEquals(ETS_LABEL, ets.label());
+                assertNotEquals("", ets.version().get());
             }
         }
         assertTrue(etsFound);

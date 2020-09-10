@@ -16,6 +16,8 @@
  */
 package de.interactive_instruments.etf.client;
 
+import java.util.Optional;
+
 /**
  * Basic Metadata of an item
  *
@@ -43,4 +45,13 @@ public interface ItemMetadata {
      * @return as non-null string
      */
     String description();
+
+    /**
+     * Version of an item
+     *
+     * @return optional String
+     */
+    default Optional<String> version() {
+        return Optional.empty();
+    }
 }
