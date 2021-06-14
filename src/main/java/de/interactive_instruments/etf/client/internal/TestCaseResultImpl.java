@@ -66,19 +66,19 @@ class TestCaseResultImpl extends AbstractResult implements TestCaseResult {
         final List<TestResult> invokedTestStepResults = new ArrayList<>();
         final JSONObjectOrArray invokedTests = new JSONObjectOrArray(jsonObj.getJSONObject(INVOKED_TESTS));
         final Collection<JSONObject> invokedTestStepResultCollection;
-        if(invokedTests.has(TEST_STEP_RESULT)) {
+        if (invokedTests.has(TEST_STEP_RESULT)) {
             invokedTestStepResultCollection = invokedTests.get(TEST_STEP_RESULT);
-        }else if(invokedTests.has(TEST_CASE_RESULT)) {
+        } else if (invokedTests.has(TEST_CASE_RESULT)) {
             final Collection<JSONObject> testCaseResults = invokedTests.get(TEST_CASE_RESULT);
             invokedTestStepResultCollection = new ArrayList<>();
             for (final JSONObject testCaseResult : testCaseResults) {
-                if(testCaseResult.has(TEST_STEP_RESULTS)) {
+                if (testCaseResult.has(TEST_STEP_RESULTS)) {
                     final Collection<JSONObject> testStepSubCollection = new JSONObjectOrArray(
                             testCaseResult.getJSONObject(TEST_STEP_RESULTS)).get(TEST_STEP_RESULT);
                     invokedTestStepResultCollection.addAll(testStepSubCollection);
                 }
             }
-        }else{
+        } else {
             invokedTestStepResultCollection = Collections.EMPTY_LIST;
         }
         for (final JSONObject invokedTest : invokedTestStepResultCollection) {

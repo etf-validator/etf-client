@@ -123,8 +123,10 @@ class TestRunCmd implements TestRun {
     }
 
     void exception(final Exception exception) {
-        if (this.exception != null) {
+        if (exception != null) {
             this.exception = exception;
+        }
+        if (this.testRunObserver != null) {
             this.testRunObserver.exceptionOccurred(exception);
         }
     }

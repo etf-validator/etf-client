@@ -16,7 +16,7 @@
  */
 package de.interactive_instruments.etf.client;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * The Test Result of an test item
@@ -60,7 +60,7 @@ public interface TestResult extends Iterable<TestResult> {
      *
      * @return start as date
      */
-    LocalDateTime startDate();
+    ZonedDateTime startDate();
 
     /**
      * The duration of this test in milliseconds

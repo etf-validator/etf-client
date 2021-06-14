@@ -17,7 +17,7 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -37,7 +37,7 @@ abstract class AbstractResult implements TestResult {
     private final String label;
     private final String description;
     private final ResultStatus status;
-    private final LocalDateTime startDate;
+    private final ZonedDateTime startDate;
     private final long duration;
     protected final ResultCtx resultCtx;
 
@@ -104,7 +104,7 @@ abstract class AbstractResult implements TestResult {
         this.label = etsItem.getString("label");
         this.description = etsItem.isNull("description") ? "" : etsItem.getString("description");
         this.status = ResultStatus.fromString(this.resultCtx.jsonObj.getString("status"));
-        this.startDate = LocalDateTime.from(
+        this.startDate = ZonedDateTime.from(
                 DateTimeFormatter.ISO_DATE_TIME.parse(
                         this.resultCtx.jsonObj.getString("startTimestamp")));
         this.duration = this.resultCtx.jsonObj.getLong("duration");
@@ -176,7 +176,7 @@ abstract class AbstractResult implements TestResult {
     abstract TestResult doCreateChild(final JSONObject child);
 
     @Override
-    final public LocalDateTime startDate() {
+    final public ZonedDateTime startDate() {
         return startDate;
     }
 

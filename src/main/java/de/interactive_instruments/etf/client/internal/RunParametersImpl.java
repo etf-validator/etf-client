@@ -41,7 +41,7 @@ public class RunParametersImpl implements RunParameters {
 
     private RunParametersImpl(final Map<String, String> map, final Set<String> required, final Set<String> statics) {
         this.parameters = new HashMap<>(Objects.requireNonNullElse(map, Collections.EMPTY_MAP));
-        this.parameters.put("AssertionsToExecute", ".*");
+        this.parameters.putIfAbsent("AssertionsToExecute", ".*");
         final Set<String> cleanRequired = new HashSet<>(required);
         cleanRequired.removeAll(statics);
         this.required = cleanRequired;

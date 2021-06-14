@@ -23,6 +23,7 @@ import java.util.Collections;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import de.interactive_instruments.etf.client.ReferenceError;
 import de.interactive_instruments.etf.client.TestResultMessageHolder;
 
 /**
@@ -40,7 +41,16 @@ abstract class AbstractTestResultMessageHolder extends AbstractResult implements
                 final JSONArray childrenArray = (JSONArray) childrenJson;
                 final Collection<String> messages = new ArrayList<>(((JSONArray) childrenJson).length());
                 for (final Object o : childrenArray) {
-                    messages.add(resultCtx.translate((JSONObject) o));
+                    final String m = resultCtx.translate((JSONObject) o);
+                    if (m != null && !m.equals("")) {
+                        messages.add(m);
+                    } else {
+                        throw new ReferenceError("Internal error in Executable Test Suite: no error translation provided."
+                                + " Contact the Test Developer. REF: "
+                                + ((JSONObject) o).optString("ref", "unknown")
+                                + " ID: "
+                                + resultCtx.jsonObj.optString("id", "unknown"));
+                    }
                 }
                 this.messages = Collections.unmodifiableCollection(messages);
             } else if (childrenJson instanceof JSONObject) {

@@ -31,7 +31,7 @@ import de.interactive_instruments.etf.client.RemoteInvocationException;
  */
 abstract class Request {
 
-    private final static String USER_AGENT_HEADER = "ETF Client 1.3";
+    private final static String USER_AGENT_HEADER = "ETF Client 1.6";
     private final static String ACCEPT_HEADER = "application/json";
     protected final Logger logger = LoggerFactory.getLogger(Request.class);
 
@@ -40,15 +40,20 @@ abstract class Request {
 
     Request(final URI url, final InstanceCtx ctx) {
         this.requestBuilder = HttpRequest.newBuilder(url)
+                .version(HttpClient.Version.HTTP_1_1)
                 .timeout(ctx.timeout)
                 .header("Accept", ACCEPT_HEADER)
                 .header("Accept-Language", ctx.locale.getLanguage())
                 .header("User-Agent", USER_AGENT_HEADER)
                 .header("ETF-Client-Session-ID", ctx.sessionId);
+
+        final HttpClient.Builder clientBuilder = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .followRedirects(HttpClient.Redirect.NORMAL);
         if (ctx.auth != null) {
-            this.httpClient = HttpClient.newBuilder().authenticator(ctx.auth).build();
+            this.httpClient = clientBuilder.authenticator(ctx.auth).build();
         } else {
-            this.httpClient = HttpClient.newBuilder().build();
+            this.httpClient = clientBuilder.build();
         }
     }
 

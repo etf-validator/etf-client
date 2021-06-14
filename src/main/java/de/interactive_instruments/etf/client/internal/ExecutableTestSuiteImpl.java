@@ -133,9 +133,9 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
                     final Object vO = argument.get("$");
                     final String token = argument.getString("token");
                     final String value;
-                    if (vO instanceof Number) {
+                    if (etsExecutionContext.instanceCtx.formatFloats() && vO instanceof Number) {
                         if (vO instanceof Double || vO instanceof Float || floatingTokensPattern.matcher(token).matches()) {
-                            value = etsExecutionContext.instanceCtx.floatFormat.format(vO);
+                            value = etsExecutionContext.instanceCtx.format(vO);
                         } else {
                             value = vO.toString();
                         }

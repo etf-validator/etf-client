@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.6.11 - 2021-06-09
+
+### Changed
+- fix: when only one ETS and one Translation Template Bundle is installed
+
+## 1.1 - 1.6 internal releases
+
+### Added
+- support for Translation Template Bundles
+- support for checked Run Parameters
+
 ## 1.1.0 - 2020-02-16
 
 ### Added

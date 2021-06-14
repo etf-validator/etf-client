@@ -20,6 +20,7 @@ import java.net.Authenticator;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
@@ -44,8 +45,9 @@ final class EndpointImpl implements EtfEndpoint {
     private final AdHocTestObjectFactoryImpl adHocTestObjectFactory;
     private boolean testRunTemplatesSupported;
 
-    EndpointImpl(final URL baseUrl, final Locale locale, final Authenticator auth, final Duration timout) {
-        this.ctx = new InstanceCtx(toBaseUri(baseUrl), auth, locale, timout);
+    EndpointImpl(final URL baseUrl, final Locale locale, final Authenticator auth, final Duration timout,
+            final DecimalFormat floatFormat) {
+        this.ctx = new InstanceCtx(toBaseUri(baseUrl), auth, locale, timout, floatFormat);
         this.statusCmd = new InstanceStatusCmd(ctx);
         this.tagCmd = new TagCollectionCmd(ctx);
         this.etsCollectionCmd = new EtsCollectionCmd(ctx);

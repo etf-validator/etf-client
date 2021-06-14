@@ -92,9 +92,9 @@ class TestRunMonitor implements Runnable {
     public void run() {
         try {
             queryUntilFinished();
-        } catch (final TimeoutException | RemoteInvocationException timeout) {
-            this.callback.exception(timeout);
+            this.callback.finished(createResultCmd.create());
+        } catch (final Exception e) {
+            this.callback.exception(e);
         }
-        this.callback.finished(createResultCmd.create());
     }
 }

@@ -38,6 +38,20 @@ abstract class AbstractEtfCollection<V extends ItemMetadata> implements EtfColle
         initChildren(jsonArray);
     }
 
+    protected AbstractEtfCollection(final Collection<JSONObject> jsonObjects, final InstanceCtx ctx) {
+        this.ctx = ctx;
+        items = new HashMap<>();
+        initChildren(jsonObjects);
+    }
+
+    protected AbstractEtfCollection(final InstanceCtx ctx, final Collection<V> items) {
+        this.ctx = ctx;
+        this.items = new HashMap<>();
+        for (final V item : items) {
+            this.items.put(item.eid(), item);
+        }
+    }
+
     protected AbstractEtfCollection(final InstanceCtx ctx) {
         this.ctx = ctx;
         items = new HashMap<>();
@@ -51,11 +65,10 @@ abstract class AbstractEtfCollection<V extends ItemMetadata> implements EtfColle
         }
     }
 
-    protected AbstractEtfCollection(final InstanceCtx ctx, final Collection<V> items) {
-        this.ctx = ctx;
-        this.items = new HashMap<>();
-        for (final V item : items) {
-            this.items.put(item.eid(), item);
+    protected void initChildren(final Collection<JSONObject> jsonObjects) {
+        for (final JSONObject jsonObject : jsonObjects) {
+            final V preparedObject = doPrepare(jsonObject);
+            items.put(preparedObject.eid(), preparedObject);
         }
     }
 

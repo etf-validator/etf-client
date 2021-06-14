@@ -23,7 +23,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.*;
@@ -44,13 +43,13 @@ class EtsCollectionCmd {
         private EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection;
         private final RunParameters runParameters;
 
-        DefaultEtsCollection(final InstanceCtx ctx, final JSONArray jsonArray,
+        DefaultEtsCollection(final InstanceCtx ctx, final Collection<JSONObject> jsonObjects,
                 final ExecutorService executor,
                 final EtfCollection<TranslationTemplateBundle> translationTemplateBundleCollection) {
             super(ctx);
             this.translationTemplateBundleCollection = translationTemplateBundleCollection;
             this.etsExecutionContext = new EtsExecutionContext(ctx, executor);
-            initChildren(jsonArray);
+            initChildren(jsonObjects);
             this.etsExecutionContext.injectExecutableTestSuites(this.items.values());
             this.runParameters = mergeRunParameters(this.items.values());
         }
@@ -149,8 +148,8 @@ class EtsCollectionCmd {
         if (apiCall.upToDate()) {
             return cachedCollection.inject(ttCResult);
         } else {
-            final JSONArray result = apiCall.query().getJSONObject("EtfItemCollection").getJSONObject("executableTestSuites")
-                    .getJSONArray("ExecutableTestSuite");
+            final Collection<JSONObject> result = new JSONObjectOrArray(apiCall.query().getJSONObject("EtfItemCollection")
+                    .getJSONObject("executableTestSuites")).get("ExecutableTestSuite");
             cachedCollection = new DefaultEtsCollection(ctx, result, executor, ttCResult);
         }
         return cachedCollection;

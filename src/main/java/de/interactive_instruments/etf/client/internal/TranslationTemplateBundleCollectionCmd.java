@@ -17,8 +17,8 @@
 package de.interactive_instruments.etf.client.internal;
 
 import java.net.URI;
+import java.util.Collection;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import de.interactive_instruments.etf.client.EtfCollection;
@@ -37,8 +37,8 @@ class TranslationTemplateBundleCollectionCmd {
 
     private static class TranslationTemplateBundleCollection extends AbstractEtfCollection<TranslationTemplateBundle> {
 
-        TranslationTemplateBundleCollection(final InstanceCtx ctx, final JSONArray jsonArray) {
-            super(ctx, jsonArray);
+        TranslationTemplateBundleCollection(final InstanceCtx ctx, final Collection<JSONObject> jsonObjects) {
+            super(jsonObjects, ctx);
         }
 
         @Override
@@ -60,8 +60,8 @@ class TranslationTemplateBundleCollectionCmd {
         if (apiCall.upToDate()) {
             return cachedCollection;
         } else {
-            final JSONArray result = apiCall.query().getJSONObject("EtfItemCollection")
-                    .getJSONObject("translationTemplateBundles").getJSONArray("TranslationTemplateBundle");
+            final Collection<JSONObject> result = new JSONObjectOrArray(apiCall.query().getJSONObject("EtfItemCollection")
+                    .getJSONObject("translationTemplateBundles")).get("TranslationTemplateBundle");
             cachedCollection = new TranslationTemplateBundleCollection(this.ctx, result);
         }
         return cachedCollection;

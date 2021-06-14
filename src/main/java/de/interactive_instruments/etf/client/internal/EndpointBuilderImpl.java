@@ -18,6 +18,8 @@ package de.interactive_instruments.etf.client.internal;
 
 import java.net.Authenticator;
 import java.net.URL;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
@@ -34,6 +36,8 @@ final public class EndpointBuilderImpl implements EtfValidatorClient {
     private Locale locale = Locale.getDefault();
     private Authenticator auth;
     private Duration timeout = Duration.ofMinutes(5);
+    private DecimalFormat floatFormat = new DecimalFormat(
+            "0.#######", new DecimalFormatSymbols(Locale.ENGLISH));
 
     @Override
     public EtfValidatorClient url(final URL url) {
@@ -60,9 +64,16 @@ final public class EndpointBuilderImpl implements EtfValidatorClient {
     }
 
     @Override
+    public EtfValidatorClient floatFormat(final DecimalFormat floatFormat) {
+        this.floatFormat = floatFormat;
+        return this;
+    }
+
+    @Override
     public EtfEndpoint init() {
         Objects.requireNonNull(this.url, "URL not set");
         Objects.requireNonNull(this.locale, "Locale not set");
-        return new EndpointImpl(this.url, this.locale, this.auth, this.timeout);
+        return new EndpointImpl(this.url, this.locale, this.auth, this.timeout,
+                this.floatFormat);
     }
 }

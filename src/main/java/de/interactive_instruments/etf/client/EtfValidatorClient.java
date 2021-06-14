@@ -18,6 +18,7 @@ package de.interactive_instruments.etf.client;
 
 import java.net.Authenticator;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Locale;
 
@@ -85,6 +86,19 @@ public interface EtfValidatorClient {
      * @return builder object
      */
     EtfValidatorClient timeout(final Duration duration);
+
+    /**
+     * Set the formatting of floating point numbers that occur in messages.
+     *
+     * Example: <code>new DecimalFormat("0.000", new DecimalFormatSymbols(Locale.ENGLISH))</code>
+     *
+     * @since 1.6
+     *
+     * @param format
+     *            DecimalFormat for formatting floating point numbers in messages
+     * @return builder object
+     */
+    EtfValidatorClient floatFormat(final DecimalFormat format);
 
     /**
      * Finalize the Configuration and return an Endpoint object
