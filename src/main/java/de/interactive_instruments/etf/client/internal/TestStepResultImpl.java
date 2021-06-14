@@ -64,4 +64,14 @@ class TestStepResultImpl extends AbstractTestResultMessageHolder implements Test
     public Iterable<? extends TestResult> children() {
         return testAssertionResult;
     }
+
+    @Override
+    public String label() {
+        final String relabel = attachments.get("relabel");
+        if (relabel != null) {
+            return relabel;
+        } else {
+            return super.label();
+        }
+    }
 }

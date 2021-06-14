@@ -29,7 +29,7 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class TestMetadata {
+public class TestResultLabel {
 
     @Test
     void testIt() throws RemoteInvocationException, IOException, ExecutionException {
@@ -45,16 +45,12 @@ public class TestMetadata {
         for (final TestResult testResult : testRun.result()) {
             if (testResult instanceof TestCaseResult) {
                 System.out.println(" " + testResult.label() + " - " + testResult.resultStatus());
+                assertNotEquals("", testResult.label());
             }
             if (testResult instanceof TestStepResult) {
                 System.out.println("    " + testResult.label() + " - " + testResult.resultStatus());
+                assertNotEquals("", testResult.label());
             }
-
-            /*
-             * if (testResult instanceof TestResultMessageHolder) { final Collection<String> messages =
-             * ((TestResultMessageHolder) testResult).messages(); for (final String message : messages) {
-             * System.out.println(" - " + message); } }
-             */
         }
     }
 

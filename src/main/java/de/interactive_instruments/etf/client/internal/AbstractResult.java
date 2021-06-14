@@ -160,7 +160,7 @@ abstract class AbstractResult implements TestResult {
         }
     }
 
-    final public String label() {
+    public String label() {
         return label;
     }
 
