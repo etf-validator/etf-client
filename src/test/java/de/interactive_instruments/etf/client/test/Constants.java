@@ -30,7 +30,7 @@ public class Constants {
     final static URL ETF_TEST_SERVICE;
     static {
         try {
-            ETF_TEST_SERVICE = new URL("http://staging-inspire-validator.eu-west-1.elasticbeanstalk.com/etf-webapp/");
+            ETF_TEST_SERVICE = new URL("http://staging-inspire-validator.eu-west-1.elasticbeanstalk.com/validator/");
         } catch (MalformedURLException e) {
             throw new RuntimeException();
         }
