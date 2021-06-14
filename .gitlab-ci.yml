@@ -1,0 +1,4 @@
+include:
+    - project: 'ci/pipeline-templates'
+      file: 'qa.gitlab-ci.yml'
+      
