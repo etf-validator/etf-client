@@ -16,7 +16,9 @@
  */
 package de.interactive_instruments.etf.client;
 
+import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -78,4 +80,17 @@ public interface TestRun extends AutoCloseable {
     default void close() throws RemoteInvocationException {
         cancel();
     }
+
+    /**
+     * A reference to the test run on the remote ETF instance. It serves as
+     * an entry point to retrieve additional information and resource of the
+     * test run from the ETF instance, like the test report in an HTML format.
+     *
+     * It must be supplemented with additional parameters and paths that
+     * can be found in the API documentation of the ETF instance.
+     *
+     * @return remote location of this Test Run or <code>empty</code> if the
+     * Test Run object is not (yet) initialized
+     */
+    Optional<URI> remoteRef();
 }

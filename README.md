@@ -93,7 +93,7 @@ repositories {
 }
 // ...
 dependencies {
-	implementation group: 'de.interactive_instruments.etf', name: 'etf-client', version: '1.1.1-SNAPSHOT'
+	implementation group: 'de.interactive_instruments.etf', name: 'etf-client', version: '1.7.0-SNAPSHOT'
 }
 ```
 

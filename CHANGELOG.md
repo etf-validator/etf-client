@@ -1,15 +1,27 @@
-# Changelog
+# ETF-Client Changelog
+
+## 1.7.0 - 2021-07-09
+
+### Added
+- support for setting a Test Run label suffix
+- access to the URL of the test run on the remote ETF instance.
+
+
 
 ## 1.6.11 - 2021-06-09
 
 ### Changed
-- fix: when only one ETS and one Translation Template Bundle is installed
+- fix: error when only one ETS and one Translation Template Bundle is installed
+
+
 
 ## 1.1 - 1.6 internal releases
 
 ### Added
 - support for Translation Template Bundles
 - support for checked Run Parameters
+
+
 
 ## 1.1.0 - 2020-02-16
 
@@ -23,10 +35,12 @@
 - increase default timeout from 2 minutes to 5
 
 
+
 ## 1.0.1 - 2020-02-11
 
 ### Changed
 - fix: empty token values in message translations cause exceptions #1
+
 
 
 ## 1.0.0 - 2019-12-11

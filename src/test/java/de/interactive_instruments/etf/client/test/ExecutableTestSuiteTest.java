@@ -20,8 +20,10 @@ import static de.interactive_instruments.etf.client.test.TestObjectTest.METADATA
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
@@ -176,7 +178,9 @@ public class ExecutableTestSuiteTest {
         final AdHocTestObject testObject = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
         assertNotNull(testObject);
 
-        final TestRun testRun = metadataEts.execute(testObject);
+        final RunParameters p = metadataEts.parameters().labelSuffix("ut");
+        final TestRun testRun = metadataEts.execute(testObject, p);
+        assertTrue(testRun.remoteRef().isPresent());
         try {
             Thread.sleep(Duration.ofSeconds(5).toMillis());
             assertNotNull(testRun);

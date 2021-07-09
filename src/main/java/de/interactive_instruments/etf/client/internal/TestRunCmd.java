@@ -37,13 +37,13 @@ class TestRunCmd implements TestRun {
 
     public final static String PATH = "TestRuns/";
 
-    private static class RestultProxy implements TestRunResult {
+    private static class ResultProxy implements TestRunResult {
 
         private final TestRun currentTestRun;
         private TestRunResult result;
         private final LocalDateTime startDate;
 
-        public RestultProxy(final TestRun currentTestRun) {
+        public ResultProxy(final TestRun currentTestRun) {
             this.currentTestRun = currentTestRun;
             this.startDate = LocalDateTime.now();
         }
@@ -96,13 +96,14 @@ class TestRunCmd implements TestRun {
         }
     }
 
-    private final RestultProxy proxy = new RestultProxy(this);
+    private final ResultProxy proxy = new ResultProxy(this);
     private final List<String> logEntries = new ArrayList<>();
     private double progress = 0;
     private Future<TestRunResult> future;
     private boolean canceled = false;
     private final TestRunObserver testRunObserver;
     private DeleteRequest deleteRequest;
+    private URI reference;
     private final InstanceCtx ctx;
     private Exception exception;
 
@@ -171,7 +172,7 @@ class TestRunCmd implements TestRun {
             final RunParameters parameters)
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
-        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
+        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
         final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ItemMetadata::eid)
                 .collect(Collectors.toList());
         startTestRequest.put("executableTestSuiteIds", executableTestSuiteIds);
@@ -186,7 +187,7 @@ class TestRunCmd implements TestRun {
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.put("testRunTemplateId", testRuntemplate.eid());
-        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo());
+        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
         startTestRequest.put("arguments", RunParametersImpl.toJson(parameters, testRuntemplate.parameters()));
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 
@@ -199,8 +200,8 @@ class TestRunCmd implements TestRun {
         final JSONObject testRunCreatedResponse = jsonPostRequest.post(startTestRequest);
         final String eid = testRunCreatedResponse.getJSONObject("EtfItemCollection").getJSONObject("testRuns")
                 .getJSONObject("TestRun").getString("id");
-        this.deleteRequest = new DeleteRequest(
-                URI.create(ctx.baseUrl.toString() + "/" + PATH + eid), ctx);
+        this.reference = URI.create(ctx.baseUrl.toString() + "/" + PATH + eid);
+        this.deleteRequest = new DeleteRequest(this.reference, ctx);
         return eid;
     }
 
@@ -219,6 +220,11 @@ class TestRunCmd implements TestRun {
         } catch (CancellationException c) {
             throw new IllegalStateException("Test Run has been canceled");
         }
+    }
+
+    @Override
+    public Optional<URI> remoteRef() {
+        return Optional.of(this.reference);
     }
 
     static TestRun start(final InstanceCtx ctx, final ExecutorService executor,

@@ -38,6 +38,7 @@ public class RunParametersImpl implements RunParameters {
     // In this simplified model static and required parameters are not required
     final Set<String> required;
     final Set<String> statics;
+    final String labelSuffix;
 
     private RunParametersImpl(final Map<String, String> map, final Set<String> required, final Set<String> statics) {
         this.parameters = new HashMap<>(Objects.requireNonNullElse(map, Collections.EMPTY_MAP));
@@ -46,10 +47,19 @@ public class RunParametersImpl implements RunParameters {
         cleanRequired.removeAll(statics);
         this.required = cleanRequired;
         this.statics = statics;
+        this.labelSuffix = null;
     }
 
     private RunParametersImpl(final RunParametersImpl current, final Map<String, String> parameters) {
         this(merge(current, parameters), current.required, current.statics);
+    }
+
+    // Copy CTOR
+    private RunParametersImpl(final String labelSuffix, final Map<String, String> parameters, final Set<String> required, final Set<String> statics) {
+        this.labelSuffix = labelSuffix;
+        this.parameters = parameters;
+        this.required = required;
+        this.statics = statics;
     }
 
     static Map<String, String> merge(final RunParametersImpl current, final Map<String, String> parameters) {
@@ -149,11 +159,13 @@ public class RunParametersImpl implements RunParameters {
         }
     }
 
+    @Override
     public RunParameters setFrom(final Map<String, String> map) {
         return new RunParametersImpl(this, map.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, HashMap::new)));
     }
 
+    @Override
     public RunParameters setFrom(final String... strings) {
         if (strings != null) {
             if (strings.length % 2 != 0) {
@@ -168,6 +180,7 @@ public class RunParametersImpl implements RunParameters {
         return this;
     }
 
+    @Override
     public RunParameters setFrom(final Collection<String> strings) {
         if (strings != null) {
             if (strings.size() % 2 != 0) {
@@ -182,6 +195,7 @@ public class RunParametersImpl implements RunParameters {
         return this;
     }
 
+    @Override
     public Map<String, String> map() {
         return Collections.unmodifiableMap(this.parameters);
     }
@@ -189,6 +203,31 @@ public class RunParametersImpl implements RunParameters {
     @Override
     public Set<String> required() {
         return this.required;
+    }
+
+    @Override
+    public RunParameters labelSuffix(final String testRunLabelSuffix) {
+        if(testRunLabelSuffix == null || testRunLabelSuffix.trim().isEmpty()) {
+            throw new IllegalArgumentException("The test run label suffix must not be null or empty");
+        }
+        final int max=75;
+        if(testRunLabelSuffix.length()>max) {
+            throw new IllegalArgumentException("The test run label suffix must not be longer than "+max+" characters");
+        }
+        return new RunParametersImpl(testRunLabelSuffix, this.parameters, this.required, this.statics);
+    }
+
+    static String labelSuffix(RunParameters runParameters) {
+        if(runParameters!=null) {
+            final RunParametersImpl p = (RunParametersImpl) runParameters;
+            final String s = p.labelSuffix;
+            if(s != null && !s.trim().isEmpty()) {
+                return " - "+s;
+            }else{
+                return "";
+            }
+        }
+        return "";
     }
 
     Set<String> statics() {
