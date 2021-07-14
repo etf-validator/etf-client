@@ -87,24 +87,22 @@ public interface RunParameters {
     Set<String> required();
 
     /**
-     * The client creates its own label for the test run, which is composed
-     * of the prefix etf-client, a session ID and a counter for the test
-     * runs. Example:
+     * The client creates its own label for the test run, which is composed of the prefix etf-client, a session ID and a
+     * counter for the test runs. Example:
      *
      * <code>
      *     ETF-client 6bb13cdd-6e05-4731-95bf-ba93188b74f9 run 6
      * </code>.
      *
-     * A suffix can be appended to the generated label. A hyphen is
-     * automatically added when you set it. It must not be longer than
-     * 70 characters. Example:
+     * A suffix can be appended to the generated label. A hyphen is automatically added when you set it. It must not be
+     * longer than 70 characters. Example:
      *
      * <code>
      *     ETF-client 6bb13cdd-6e05-4731-95bf-ba93188b74f9 run 6 - My Test Run
      * </code>.
      *
-     * @param testRunLabelSuffix the suffix that will be appended to the
-     *                           generated label.
+     * @param testRunLabelSuffix
+     *            the suffix that will be appended to the generated label.
      *
      * @throws IllegalArgumentException
      *             if the String is null/empty or longer than 75 characters

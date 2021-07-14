@@ -156,9 +156,9 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
     }
 
     @Override
-    public TestRun execute(final TestObject testObject, RunParameters parameters)
+    public TestRunCloseable execute(final TestObject testObject, RunParameters parameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException {
-        return execute(testObject, null, parameters);
+        return (TestRunCloseable) execute(testObject, null, parameters);
     }
 
     @Override

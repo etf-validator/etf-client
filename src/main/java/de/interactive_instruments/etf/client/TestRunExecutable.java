@@ -44,7 +44,7 @@ public interface TestRunExecutable {
      *             {@link #execute(TestObject, TestRunObserver, RunParameters)}
      */
     @Deprecated
-    default TestRun execute(final TestObject testObject)
+    default TestRunCloseable execute(final TestObject testObject)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
             TestRunParameterException {
         return execute(testObject, (RunParameters) null);
@@ -71,7 +71,7 @@ public interface TestRunExecutable {
      * @throws TestRunParameterException
      *             if a parameter-related error has occurred
      */
-    TestRun execute(final TestObject testObject, final RunParameters runParameters)
+    TestRunCloseable execute(final TestObject testObject, final RunParameters runParameters)
             throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
             TestRunParameterException;
 

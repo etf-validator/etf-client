@@ -55,7 +55,8 @@ public class RunParametersImpl implements RunParameters {
     }
 
     // Copy CTOR
-    private RunParametersImpl(final String labelSuffix, final Map<String, String> parameters, final Set<String> required, final Set<String> statics) {
+    private RunParametersImpl(final String labelSuffix, final Map<String, String> parameters, final Set<String> required,
+            final Set<String> statics) {
         this.labelSuffix = labelSuffix;
         this.parameters = parameters;
         this.required = required;
@@ -207,23 +208,23 @@ public class RunParametersImpl implements RunParameters {
 
     @Override
     public RunParameters labelSuffix(final String testRunLabelSuffix) {
-        if(testRunLabelSuffix == null || testRunLabelSuffix.trim().isEmpty()) {
+        if (testRunLabelSuffix == null || testRunLabelSuffix.trim().isEmpty()) {
             throw new IllegalArgumentException("The test run label suffix must not be null or empty");
         }
-        final int max=75;
-        if(testRunLabelSuffix.length()>max) {
-            throw new IllegalArgumentException("The test run label suffix must not be longer than "+max+" characters");
+        final int max = 75;
+        if (testRunLabelSuffix.length() > max) {
+            throw new IllegalArgumentException("The test run label suffix must not be longer than " + max + " characters");
         }
         return new RunParametersImpl(testRunLabelSuffix, this.parameters, this.required, this.statics);
     }
 
     static String labelSuffix(RunParameters runParameters) {
-        if(runParameters!=null) {
+        if (runParameters != null) {
             final RunParametersImpl p = (RunParametersImpl) runParameters;
             final String s = p.labelSuffix;
-            if(s != null && !s.trim().isEmpty()) {
-                return " - "+s;
-            }else{
+            if (s != null && !s.trim().isEmpty()) {
+                return " - " + s;
+            } else {
                 return "";
             }
         }

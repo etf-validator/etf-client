@@ -33,7 +33,7 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-class TestRunCmd implements TestRun {
+class TestRunCmd implements TestRunCloseable {
 
     public final static String PATH = "TestRuns/";
 
@@ -172,7 +172,8 @@ class TestRunCmd implements TestRun {
             final RunParameters parameters)
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
-        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
+        startTestRequest.putOnce("label",
+                "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
         final Collection<String> executableTestSuiteIds = executableTestSuites.stream().map(ItemMetadata::eid)
                 .collect(Collectors.toList());
         startTestRequest.put("executableTestSuiteIds", executableTestSuiteIds);
@@ -187,7 +188,8 @@ class TestRunCmd implements TestRun {
             throws RemoteInvocationException {
         final JSONObject startTestRequest = new JSONObjectWithOrderedAttributes();
         startTestRequest.put("testRunTemplateId", testRuntemplate.eid());
-        startTestRequest.putOnce("label", "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
+        startTestRequest.putOnce("label",
+                "ETF-client " + ctx.sessionId + " run " + ctx.requestNo() + RunParametersImpl.labelSuffix(parameters));
         startTestRequest.put("arguments", RunParametersImpl.toJson(parameters, testRuntemplate.parameters()));
         startTestRequest.put("testObject", ((AdHocTestObjectImpl) testObject).toJson());
 

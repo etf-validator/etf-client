@@ -95,9 +95,9 @@ class EtsCollectionCmd {
         }
 
         @Override
-        public TestRun execute(final TestObject testObject, final RunParameters parameters)
+        public TestRunCloseable execute(final TestObject testObject, final RunParameters parameters)
                 throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
-            return execute(testObject, null, parameters);
+            return (TestRunCloseable) execute(testObject, null, parameters);
         }
 
         @Override

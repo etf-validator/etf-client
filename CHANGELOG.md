@@ -1,5 +1,10 @@
 # ETF-Client Changelog
 
+## 1.7.1 - 2021-07-14
+
+### Changed
+- fix: do not provide AutoClosable interface for observed test runs
+
 ## 1.7.0 - 2021-07-09
 
 ### Added

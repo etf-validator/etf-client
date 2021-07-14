@@ -20,10 +20,9 @@ import static de.interactive_instruments.etf.client.test.TestObjectTest.METADATA
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -190,6 +189,30 @@ public class ExecutableTestSuiteTest {
         } finally {
             testRun.cancel();
         }
+    }
+
+    @Test
+    void startSingleAndClose() throws RemoteInvocationException, MalformedURLException, InterruptedException {
+        final EtfEndpoint etfEndpoint = Constants.ETF_ENDPOINT;
+
+        final ExecutableTestSuite metadataEts = etfEndpoint.executableTestSuites().itemById(ETS_ID).get();
+        assertNotNull(metadataEts);
+
+        final AdHocTestObject testObject = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
+        assertNotNull(testObject);
+
+        final RunParameters p = metadataEts.parameters().labelSuffix("ut");
+
+        final AtomicBoolean finished = new AtomicBoolean(false);
+        final TestRunObserver observer = testRun -> {
+            finished.set(true);
+            System.out.println("Finished");
+        };
+        final TestRun testRun = metadataEts.execute(testObject, observer, p);
+        while (!finished.get()) {
+            //
+        }
+        System.out.println("Terminating");
     }
 
     @Test
