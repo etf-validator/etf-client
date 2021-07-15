@@ -20,8 +20,10 @@ import java.net.Authenticator;
 import java.net.URI;
 import java.text.DecimalFormat;
 import java.time.Duration;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -36,6 +38,8 @@ final class InstanceCtx {
     final String sessionId;
     final AtomicInteger requestNo = new AtomicInteger(1);
     private final DecimalFormat floatFormat;
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final Set<TestRunCmd> testRuns = new ConcurrentSkipListSet<>();
 
     InstanceCtx(final URI baseUrl, final Authenticator auth, final Locale locale,
             final Duration timeout, final DecimalFormat floatFormat) {
@@ -53,6 +57,29 @@ final class InstanceCtx {
         } else {
             return obj.toString();
         }
+    }
+
+    ExecutorService executor() {
+        return executor;
+    }
+
+    void registerRun(final TestRunCmd testRun) {
+        this.testRuns.add(testRun);
+    }
+
+    void deregisterRun(final TestRunCmd testRun) {
+        this.testRuns.remove(testRun);
+    }
+
+    synchronized void close() {
+        executor.shutdown();
+        final Collection<TestRunCmd> testRunsCopy = new ArrayList<>(this.testRuns);
+        for (final TestRunCmd run : testRunsCopy) {
+            try {
+                run.cancel();
+            } catch (final Exception ignore) {}
+        }
+        this.testRuns.clear();
     }
 
     boolean formatFloats() {

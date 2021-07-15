@@ -21,7 +21,7 @@ package de.interactive_instruments.etf.client;
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class IncompatibleTestObjectTypesException extends IllegalArgumentException {
+public class IncompatibleTestObjectTypesException extends IllegalArgumentException implements EtfClientException {
 
     public IncompatibleTestObjectTypesException() {
         super("The type of the Test Object and the supported Type of the Executable Test Suite are not compatible.");

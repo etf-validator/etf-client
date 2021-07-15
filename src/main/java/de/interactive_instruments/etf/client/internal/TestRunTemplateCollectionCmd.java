@@ -19,7 +19,6 @@ package de.interactive_instruments.etf.client.internal;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,10 +28,9 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class TestRunTemplateCollectionCmd {
+class TestRunTemplateCollectionCmd {
 
     private final static String PATH = "/TestRunTemplates";
-    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final InstanceCtx ctx;
 
     private static class DefaultTestRunTemplateCollection extends AbstractEtfCollection<TestRunTemplate>
@@ -64,19 +62,19 @@ public class TestRunTemplateCollectionCmd {
 
         @Override
         public TestRunCloseable execute(final TestObject testObject, final RunParameters parameters)
-                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
             return (TestRunCloseable) execute(testObject, null, parameters);
         }
 
         @Override
         public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver,
                 final RunParameters parameters)
-                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
             if (this.items.isEmpty()) {
-                throw new IllegalStateException("The Executable Test Suite Collection is empty");
+                throw new EtfIllegalStateException("The Executable Test Suite Collection is empty");
             }
             if (this.items.values().size() > 1) {
-                throw new IllegalStateException("Starting multiple Test Run Templates is not supported, "
+                throw new EtfIllegalStateException("Starting multiple Test Run Templates is not supported, "
                         + "only one template may be selected.");
             }
             final TestRunTemplate trt = this.items.get(0);
@@ -119,8 +117,8 @@ public class TestRunTemplateCollectionCmd {
         } else {
             final JSONArray result = apiCall.query().getJSONObject("EtfItemCollection").getJSONObject("testRunTemplates")
                     .getJSONArray("TestRunTemplate");
-            cachedCollection = new TestRunTemplateCollectionCmd.DefaultTestRunTemplateCollection(ctx, result, executor,
-                    etsResult, ttCResult);
+            cachedCollection = new TestRunTemplateCollectionCmd.DefaultTestRunTemplateCollection(ctx, result,
+                    ctx.executor(), etsResult, ttCResult);
         }
         return cachedCollection;
     }

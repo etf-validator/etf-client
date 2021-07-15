@@ -37,15 +37,16 @@ public interface TestRunExecutable {
      *             if the ETF instance returned an error
      * @throws IncompatibleTestObjectTypesException
      *             when the Test Object Type and the types supported by the ETS are incompatible
-     * @throws IllegalStateException
-     *             when the method is invoked on an empty ETS collection
+     * @throws EtfIllegalStateException
+     *             when the method is invoked on an empty ETS collection or the connection to the remote instance has been
+     *             closed
      * @throws TestRunParameterException
      *             if a required Test Run Parameter is not set. Use
      *             {@link #execute(TestObject, TestRunObserver, RunParameters)}
      */
     @Deprecated
     default TestRunCloseable execute(final TestObject testObject)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException,
             TestRunParameterException {
         return execute(testObject, (RunParameters) null);
     }
@@ -66,13 +67,14 @@ public interface TestRunExecutable {
      *             if the ETF instance returned an error
      * @throws IncompatibleTestObjectTypesException
      *             when the Test Object Type and the types supported by the ETS are incompatible
-     * @throws IllegalStateException
-     *             when the method is invoked on an empty ETS collection
+     * @throws EtfIllegalStateException
+     *             when the method is invoked on an empty ETS collection or the connection to the remote instance has been
+     *             closed
      * @throws TestRunParameterException
      *             if a parameter-related error has occurred
      */
     TestRunCloseable execute(final TestObject testObject, final RunParameters runParameters)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException,
             TestRunParameterException;
 
     /**
@@ -92,15 +94,16 @@ public interface TestRunExecutable {
      *             if the ETF instance returned an error
      * @throws IncompatibleTestObjectTypesException
      *             when the Test Object Type and the types supported by the ETS are incompatible
-     * @throws IllegalStateException
-     *             when the method is invoked on an empty ETS collection
+     * @throws EtfIllegalStateException
+     *             * when the method is invoked on an empty ETS collection or * the connection to the remote instance has
+     *             been closed
      * @throws TestRunParameterException
      *             if a required Test Run Parameter is not set. Use
      *             {@link #execute(TestObject, TestRunObserver, RunParameters)}
      */
     @Deprecated
     default TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException,
             TestRunParameterException {
         return execute(testObject, testRunObserver, null);
     }
@@ -124,13 +127,14 @@ public interface TestRunExecutable {
      *             if the ETF instance returned an error
      * @throws IncompatibleTestObjectTypesException
      *             when the Test Object Type and the types supported by the ETS are incompatible
-     * @throws IllegalStateException
-     *             when the method is invoked on an empty ETS collection
+     * @throws EtfIllegalStateException
+     *             when the method is invoked on an empty ETS collection or the connection to the remote instance has been
+     *             closed
      * @throws TestRunParameterException
      *             if a parameter-related error occurred
      */
     TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters runParameters)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException,
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException,
             TestRunParameterException;
 
     /**

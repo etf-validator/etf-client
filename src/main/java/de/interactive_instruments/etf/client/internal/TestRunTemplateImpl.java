@@ -75,13 +75,13 @@ public class TestRunTemplateImpl extends AbstractMetadata implements TestRunTemp
 
     @Override
     public TestRunCloseable execute(final TestObject testObject, final RunParameters parameters)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
         return (TestRunCloseable) execute(testObject, null, parameters);
     }
 
     @Override
     public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver, final RunParameters parameters)
-            throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+            throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
         if (!testObject.baseType().equals(this.baseType)) {
             throw new IncompatibleTestObjectTypesException();
         }

@@ -17,14 +17,14 @@
 package de.interactive_instruments.etf.client;
 
 /**
- * Holds connection information about to the ETF instance (does not mean that there is a permanent connection to ETF).
- * Retrieved information are cached.
+ * An interface to communicate with a remote ETF instance. There is no permanent connection to the instance, retrieved
+ * information are cached.
  *
  * With each operation on the API it is checked whether information is outdated and if necessary automatically renewed.
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public interface EtfEndpoint {
+public interface EtfEndpoint extends AutoCloseable {
 
     /**
      * Returns true if the endpoint is reachable.
@@ -84,4 +84,12 @@ public interface EtfEndpoint {
      * @return session UUID as string
      */
     String sessionId();
+
+    /**
+     * Explicitly releases internal resources.
+     *
+     * Running Tests will be canceled.
+     */
+    @Override
+    void close();
 }

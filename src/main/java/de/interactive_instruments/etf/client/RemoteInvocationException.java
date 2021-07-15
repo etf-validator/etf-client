@@ -27,7 +27,7 @@ import org.json.JSONObject;
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class RemoteInvocationException extends Exception {
+public class RemoteInvocationException extends Exception implements EtfClientException {
 
     private final int statusCode;
     private final Object responseBody;

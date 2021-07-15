@@ -153,4 +153,9 @@ final class EndpointImpl implements EtfEndpoint {
     public String sessionId() {
         return this.ctx.sessionId;
     }
+
+    @Override
+    public void close() {
+        this.ctx.close();
+    }
 }

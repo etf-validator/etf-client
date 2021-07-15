@@ -55,12 +55,12 @@ public interface TestRun {
      *
      * @return the Test Run Result when the Test Run finishes
      *
-     * @throws IllegalStateException
+     * @throws EtfIllegalStateException
      *             if the Test Run has been cancelled
      * @throws ExecutionException
      *             if an exception occurred during the Test Run
      */
-    TestRunResult result() throws IllegalStateException, ExecutionException;
+    TestRunResult result() throws EtfIllegalStateException, ExecutionException;
 
     /**
      * A reference to the test run on the remote ETF instance. It serves as an entry point to retrieve additional

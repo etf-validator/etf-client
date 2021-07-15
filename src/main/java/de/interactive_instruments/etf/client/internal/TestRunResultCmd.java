@@ -134,7 +134,7 @@ class TestRunResultCmd implements CreateResultCmd {
         try {
             result = jsonGetRequest.query();
         } catch (RemoteInvocationException e) {
-            throw new IllegalStateException(e);
+            throw new EtfIllegalStateException("Failed to parse result", e);
         }
         final JSONObject testRun = result.getJSONObject("EtfItemCollection").getJSONObject(
                 "testRuns").getJSONObject("TestRun");

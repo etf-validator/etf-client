@@ -21,7 +21,7 @@ package de.interactive_instruments.etf.client;
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class FeatureNotSupportedException extends IllegalStateException {
+public class FeatureNotSupportedException extends IllegalStateException implements EtfClientException {
 
     public FeatureNotSupportedException(final String currentVersion, final String requiredVersion) {
         super("This Feature is not supported by the remote ETF instance (version '" + currentVersion + "'). At least version '"

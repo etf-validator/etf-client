@@ -1,15 +1,15 @@
 # ETF-Client Changelog
 
-## 1.7.1 - 2021-07-14
 
-### Changed
-- fix: do not provide AutoClosable interface for observed test runs
-
-## 1.7.0 - 2021-07-09
+## 1.7.2 - 2021-07-15
 
 ### Added
 - support for setting a Test Run label suffix
-- access to the URL of the test run on the remote ETF instance.
+- access to the URL of the test run on the remote ETF instance
+- close method on the EtfEndpoint interface to explicitly release resources
+
+### Changed
+- fix: do not provide AutoClosable interface for observed test runs
 
 
 

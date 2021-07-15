@@ -20,7 +20,6 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -33,7 +32,6 @@ import de.interactive_instruments.etf.client.*;
 class EtsCollectionCmd {
 
     private final static String PATH = "/ExecutableTestSuites";
-    private final ExecutorService executor = Executors.newCachedThreadPool();
     private final InstanceCtx ctx;
 
     private static class DefaultEtsCollection extends AbstractEtfCollection<ExecutableTestSuite> implements EtsCollection {
@@ -80,14 +78,14 @@ class EtsCollectionCmd {
         @Override
         public EtsCollection itemsById(final String... eids) {
             if (eids == null || eids.length == 0) {
-                throw new IllegalArgumentException("EIDs are empty");
+                throw new EtfIllegalArgumentException("EIDs are empty");
             }
             final List<ExecutableTestSuite> filteredItems = Arrays.stream(eids).map(this.items::get).filter(
                     Objects::nonNull).collect(Collectors.toList());
             if (eids.length != filteredItems.size()) {
                 for (final String eid : eids) {
                     if (filteredItems.stream().map(ItemMetadata::eid).findFirst().isEmpty()) {
-                        throw new IllegalArgumentException("Executable Test Suite with EID '" + eid + "' not found");
+                        throw new EtfIllegalArgumentException("Executable Test Suite with EID '" + eid + "' not found");
                     }
                 }
             }
@@ -96,16 +94,16 @@ class EtsCollectionCmd {
 
         @Override
         public TestRunCloseable execute(final TestObject testObject, final RunParameters parameters)
-                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
             return (TestRunCloseable) execute(testObject, null, parameters);
         }
 
         @Override
         public TestRun execute(final TestObject testObject, final TestRunObserver testRunObserver,
                 final RunParameters parameters)
-                throws RemoteInvocationException, IncompatibleTestObjectTypesException, IllegalStateException {
+                throws RemoteInvocationException, IncompatibleTestObjectTypesException, EtfIllegalStateException {
             if (this.items.isEmpty()) {
-                throw new IllegalStateException("The Executable Test Suite Collection is empty");
+                throw new EtfIllegalStateException("The Executable Test Suite Collection is empty");
             }
             for (final ExecutableTestSuite ets : this.items.values()) {
                 if (!testObject.baseType().equals(ets.supportedBaseType())) {
@@ -150,7 +148,7 @@ class EtsCollectionCmd {
         } else {
             final Collection<JSONObject> result = new JSONObjectOrArray(apiCall.query().getJSONObject("EtfItemCollection")
                     .getJSONObject("executableTestSuites")).get("ExecutableTestSuite");
-            cachedCollection = new DefaultEtsCollection(ctx, result, executor, ttCResult);
+            cachedCollection = new DefaultEtsCollection(ctx, result, ctx.executor(), ttCResult);
         }
         return cachedCollection;
     }

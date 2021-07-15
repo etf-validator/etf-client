@@ -21,7 +21,7 @@ package de.interactive_instruments.etf.client;
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class TestRunParameterException extends IllegalArgumentException {
+public class TestRunParameterException extends IllegalArgumentException implements EtfClientException {
     public TestRunParameterException(final String message) {
         super(message);
     }

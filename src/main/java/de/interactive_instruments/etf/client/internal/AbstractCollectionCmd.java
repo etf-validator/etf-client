@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import de.interactive_instruments.etf.client.EtfCollection;
+import de.interactive_instruments.etf.client.EtfIllegalStateException;
 import de.interactive_instruments.etf.client.RemoteInvocationException;
 
 /**
@@ -32,7 +33,7 @@ abstract class AbstractCollectionCmd {
         try {
             futureResult = futureCollection.get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new IllegalStateException(e);
+            throw new EtfIllegalStateException("Interrupted", e);
         }
         if (futureResult instanceof RemoteInvocationException) {
             throw (RemoteInvocationException) futureResult;

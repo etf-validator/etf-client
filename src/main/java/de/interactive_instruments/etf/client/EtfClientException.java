@@ -17,14 +17,8 @@
 package de.interactive_instruments.etf.client;
 
 /**
- * Thrown if an item could not be resolved. This most likely will happen if there is an issue with the Executable Test
- * Suite, the Translation Templates or the configuration in general.
+ * Marker interface for Exceptions from the ETF Client
  *
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-public class ReferenceError extends IllegalStateException implements EtfClientException {
-
-    public ReferenceError(final String s) {
-        super(s);
-    }
-}
+public interface EtfClientException {}

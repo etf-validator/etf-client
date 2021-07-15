@@ -20,10 +20,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -33,12 +30,11 @@ import de.interactive_instruments.etf.client.*;
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-class TestRunCmd implements TestRunCloseable {
+class TestRunCmd implements TestRunCloseable, Comparable<TestRunCmd> {
 
     public final static String PATH = "TestRuns/";
 
     private static class ResultProxy implements TestRunResult {
-
         private final TestRun currentTestRun;
         private TestRunResult result;
         private final LocalDateTime startDate;
@@ -141,8 +137,9 @@ class TestRunCmd implements TestRunCloseable {
         return deleteRequest;
     }
 
-    private void injectFuture(final Future<TestRunResult> future) {
+    private void injectAfterStart(final Future<TestRunResult> future) {
         this.future = future;
+        this.ctx.registerRun(this);
     }
 
     @Override
@@ -150,6 +147,7 @@ class TestRunCmd implements TestRunCloseable {
         if (!canceled) {
             canceled = true;
             this.deleteRequest.delete();
+            this.ctx.deregisterRun(this);
         }
     }
 
@@ -202,15 +200,15 @@ class TestRunCmd implements TestRunCloseable {
         final JSONObject testRunCreatedResponse = jsonPostRequest.post(startTestRequest);
         final String eid = testRunCreatedResponse.getJSONObject("EtfItemCollection").getJSONObject("testRuns")
                 .getJSONObject("TestRun").getString("id");
-        this.reference = URI.create(ctx.baseUrl.toString() + "/" + PATH + eid);
+        this.reference = URI.create(ctx.baseUrl + "/" + PATH + eid);
         this.deleteRequest = new DeleteRequest(this.reference, ctx);
         return eid;
     }
 
     @Override
-    public TestRunResult result() throws IllegalStateException, ExecutionException {
+    public TestRunResult result() throws EtfIllegalStateException, ExecutionException {
         if (canceled) {
-            throw new IllegalStateException("Test Run has been canceled");
+            throw new EtfIllegalStateException("Test Run has been canceled");
         }
         if (exception != null) {
             throw new ExecutionException(exception);
@@ -218,9 +216,9 @@ class TestRunCmd implements TestRunCloseable {
         try {
             return future.get();
         } catch (InterruptedException e) {
-            throw new ExecutionException(e);
+            throw new EtfIllegalStateException("Test Run has been interrupted", e);
         } catch (CancellationException c) {
-            throw new IllegalStateException("Test Run has been canceled");
+            throw new EtfIllegalStateException("Test Run has been canceled", c);
         }
     }
 
@@ -262,8 +260,19 @@ class TestRunCmd implements TestRunCloseable {
         final TestRunResultCmd testRunResultCmd = new TestRunResultCmd(
                 ctx, eid, etsMap, testRunCmd.deleteRequest());
         final TestRunMonitor statusQuery = new TestRunMonitor(ctx, testRunCmd, eid, testRunResultCmd);
-        final Future<TestRunResult> future = executor.submit(statusQuery, testRunCmd.resultProxy());
-        testRunCmd.injectFuture(future);
-        return testRunCmd;
+        try {
+            final Future<TestRunResult> future = executor.submit(statusQuery, testRunCmd.resultProxy());
+            testRunCmd.injectAfterStart(future);
+            return testRunCmd;
+        } catch (final RejectedExecutionException e) {
+            throw new EtfIllegalStateException(
+                    "The Connection to the endpoint with session ID '"
+                            + ctx.sessionId + "' has already been closed.");
+        }
+    }
+
+    @Override
+    public int compareTo(final TestRunCmd run) {
+        return this.reference.compareTo(run.reference);
     }
 }

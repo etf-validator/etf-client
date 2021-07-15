@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
 
@@ -192,8 +192,8 @@ public class ExecutableTestSuiteTest {
     }
 
     @Test
-    void startSingleAndClose() throws RemoteInvocationException, MalformedURLException, InterruptedException {
-        final EtfEndpoint etfEndpoint = Constants.ETF_ENDPOINT;
+    void startSingleAndClose() throws Exception {
+        final EtfEndpoint etfEndpoint = Constants.create();
 
         final ExecutableTestSuite metadataEts = etfEndpoint.executableTestSuites().itemById(ETS_ID).get();
         assertNotNull(metadataEts);
@@ -203,16 +203,17 @@ public class ExecutableTestSuiteTest {
 
         final RunParameters p = metadataEts.parameters().labelSuffix("ut");
 
-        final AtomicBoolean finished = new AtomicBoolean(false);
+        final AtomicInteger finished = new AtomicInteger(0);
         final TestRunObserver observer = testRun -> {
-            finished.set(true);
+            finished.set(1);
             System.out.println("Finished");
         };
         final TestRun testRun = metadataEts.execute(testObject, observer, p);
-        while (!finished.get()) {
+        while (finished.get() != 1) {
             //
         }
-        System.out.println("Terminating");
+        assertTrue(testRun.finished());
+        etfEndpoint.close();
     }
 
     @Test
@@ -232,7 +233,7 @@ public class ExecutableTestSuiteTest {
     }
 
     @Test
-    void startMultiple() throws RemoteInvocationException, MalformedURLException {
+    void startMultipleEtsInOneRun() throws RemoteInvocationException, MalformedURLException {
         final EtfEndpoint etfEndpoint = Constants.ETF_ENDPOINT;
 
         final Tag metadataTag = etfEndpoint.tags().itemById(TagTest.METADATA_TAG_ID).get();
@@ -249,5 +250,37 @@ public class ExecutableTestSuiteTest {
         final double progress = testRun.progress();
         assertTrue(progress <= 1.0);
         assertTrue(progress >= 0.0);
+    }
+
+    @Test
+    void startMultipleRunsInParallelAndClose() throws RemoteInvocationException, MalformedURLException, InterruptedException {
+        final EtfEndpoint etfEndpoint = Constants.create();
+
+        final Tag metadataTag = etfEndpoint.tags().itemById(TagTest.METADATA_TAG_ID).get();
+        assertNotNull(metadataTag);
+
+        final EtsCollection metadataEtss = etfEndpoint.executableTestSuites().itemsByTag(metadataTag);
+        assertNotNull(metadataEtss);
+
+        final AdHocTestObject testObject1 = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
+        assertNotNull(testObject1);
+        final TestRun testRun1 = metadataEtss.execute(testObject1, t -> {});
+        assertNotNull(testRun1);
+
+        final AdHocTestObject testObject2 = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
+        assertNotNull(testObject2);
+        final TestRun testRun2 = metadataEtss.execute(testObject2, t -> {});
+        assertNotNull(testRun2);
+
+        Thread.sleep(500);
+        final double progress1 = testRun1.progress();
+        assertTrue(progress1 <= 1.0);
+        assertTrue(progress1 >= 0.0);
+
+        final double progress2 = testRun2.progress();
+        assertTrue(progress2 <= 1.0);
+        assertTrue(progress2 >= 0.0);
+
+        etfEndpoint.close();
     }
 }

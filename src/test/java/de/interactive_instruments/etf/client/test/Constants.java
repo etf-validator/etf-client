@@ -37,4 +37,8 @@ public class Constants {
     }
 
     public final static EtfEndpoint ETF_ENDPOINT = EtfValidatorClient.create().url(ETF_TEST_SERVICE).init();
+
+    public final static EtfEndpoint create() {
+        return EtfValidatorClient.create().url(ETF_TEST_SERVICE).init();
+    }
 }
