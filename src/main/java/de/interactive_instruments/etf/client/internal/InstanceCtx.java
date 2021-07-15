@@ -76,7 +76,9 @@ final class InstanceCtx {
         final Collection<TestRunCmd> testRunsCopy = new ArrayList<>(this.testRuns);
         for (final TestRunCmd run : testRunsCopy) {
             try {
-                run.cancel();
+                if (!run.finished()) {
+                    run.cancel();
+                }
             } catch (final Exception ignore) {}
         }
         this.testRuns.clear();

@@ -214,6 +214,7 @@ class TestRunCmd implements TestRunCloseable, Comparable<TestRunCmd> {
             throw new ExecutionException(exception);
         }
         try {
+            this.ctx.deregisterRun(this);
             return future.get();
         } catch (InterruptedException e) {
             throw new EtfIllegalStateException("Test Run has been interrupted", e);
