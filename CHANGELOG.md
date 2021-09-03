@@ -1,7 +1,11 @@
 # ETF-Client Changelog
 
+## 1.7.4 - 2021-09-03
 
-## 1.7.2 - 2021-07-15
+### Added
+- CD Test driver support
+
+## 1.7.3 - 2021-07-16
 
 ### Added
 - support for setting a Test Run label suffix
@@ -10,6 +14,7 @@
 
 ### Changed
 - fix: do not provide AutoClosable interface for observed test runs
+- fix: check that at least Java Version 11.0.8 is used
 
 
 

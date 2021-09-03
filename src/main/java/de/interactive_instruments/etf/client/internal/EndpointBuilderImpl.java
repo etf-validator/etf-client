@@ -23,14 +23,16 @@ import java.text.DecimalFormatSymbols;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 
 import de.interactive_instruments.etf.client.EtfEndpoint;
 import de.interactive_instruments.etf.client.EtfValidatorClient;
+import de.interactive_instruments.etf.client.EtfValidatorClientWithExecutorService;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
  */
-final public class EndpointBuilderImpl implements EtfValidatorClient {
+final public class EndpointBuilderImpl implements EtfValidatorClientWithExecutorService {
 
     private URL url;
     private Locale locale = Locale.getDefault();
@@ -38,6 +40,7 @@ final public class EndpointBuilderImpl implements EtfValidatorClient {
     private Duration timeout = Duration.ofMinutes(5);
     private DecimalFormat floatFormat = new DecimalFormat(
             "0.#######", new DecimalFormatSymbols(Locale.ENGLISH));
+    private ExecutorService executorService = null;
 
     @Override
     public EtfValidatorClient url(final URL url) {
@@ -70,10 +73,16 @@ final public class EndpointBuilderImpl implements EtfValidatorClient {
     }
 
     @Override
+    public EtfValidatorClientWithExecutorService executorService(final ExecutorService executorService) {
+        this.executorService = executorService;
+        return this;
+    }
+
+    @Override
     public EtfEndpoint init() {
         Objects.requireNonNull(this.url, "URL not set");
         Objects.requireNonNull(this.locale, "Locale not set");
-        return new EndpointImpl(this.url, this.locale, this.auth, this.timeout,
+        return new EndpointImpl(executorService, this.url, this.locale, this.auth, this.timeout,
                 this.floatFormat);
     }
 }

@@ -42,12 +42,15 @@ class TestRunMonitor implements Runnable {
     private final static long maxIterations = Duration.ofHours(24).toMillis() / waitTime;
     private final JsonGetRequest jsonGetRequest;
     private final CreateResultCmd createResultCmd;
+    private final String id;
 
     TestRunMonitor(final InstanceCtx ctx, final TestRunCmd callback,
             final String testRunEid, final CreateResultCmd createResultCmd) {
         this.callback = callback;
         this.createResultCmd = createResultCmd;
-        jsonGetRequest = new JsonGetRequest(URI.create(ctx.baseUrl.toString() + "/" + PATH + testRunEid + suffix), ctx);
+        this.id = ctx.sessionId + "-" + testRunEid;
+        jsonGetRequest = new JsonGetRequest(URI.create(
+                ctx.baseUrl.toString() + "/" + PATH + testRunEid + suffix), ctx);
     }
 
     private boolean queryProgress() throws RemoteInvocationException {
@@ -91,6 +94,7 @@ class TestRunMonitor implements Runnable {
     @Override
     public void run() {
         try {
+            Thread.currentThread().setName("etf-client-" + this.id);
             queryUntilFinished();
             this.callback.finished(createResultCmd.create());
         } catch (final Exception e) {

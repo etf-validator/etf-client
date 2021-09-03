@@ -24,6 +24,7 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,9 +46,20 @@ final class EndpointImpl implements EtfEndpoint {
     private final AdHocTestObjectFactoryImpl adHocTestObjectFactory;
     private boolean testRunTemplatesSupported;
 
-    EndpointImpl(final URL baseUrl, final Locale locale, final Authenticator auth, final Duration timout,
+    static {
+        final Runtime.Version currentVersion = Runtime.Version.parse(System.getProperty("java.version"));
+        final Runtime.Version minVersion = Runtime.Version.parse("11.0.8");
+        if (currentVersion.compareTo(minVersion) < 0) {
+            throw new RuntimeException(
+                    "Java Version " + currentVersion + " not supported. "
+                            + "Versions prior to Java 11.0.8 may cause application freezes or delayed exit times (see [JDK-8240071]).");
+        }
+    }
+
+    EndpointImpl(final ExecutorService executorService, final URL baseUrl, final Locale locale, final Authenticator auth,
+            final Duration timout,
             final DecimalFormat floatFormat) {
-        this.ctx = new InstanceCtx(toBaseUri(baseUrl), auth, locale, timout, floatFormat);
+        this.ctx = new InstanceCtx(executorService, toBaseUri(baseUrl), auth, locale, timout, floatFormat);
         this.statusCmd = new InstanceStatusCmd(ctx);
         this.tagCmd = new TagCollectionCmd(ctx);
         this.etsCollectionCmd = new EtsCollectionCmd(ctx);

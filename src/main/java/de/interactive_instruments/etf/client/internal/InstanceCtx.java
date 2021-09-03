@@ -21,9 +21,7 @@ import java.net.URI;
 import java.text.DecimalFormat;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -38,11 +36,17 @@ final class InstanceCtx {
     final String sessionId;
     final AtomicInteger requestNo = new AtomicInteger(1);
     private final DecimalFormat floatFormat;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
     private final Set<TestRunCmd> testRuns = new ConcurrentSkipListSet<>();
 
-    InstanceCtx(final URI baseUrl, final Authenticator auth, final Locale locale,
+    InstanceCtx(final ExecutorService executorService, final URI baseUrl, final Authenticator auth, final Locale locale,
             final Duration timeout, final DecimalFormat floatFormat) {
+        if (executorService == null) {
+            this.executor = new ThreadPoolExecutor(0, 256, 5,
+                    TimeUnit.SECONDS, new SynchronousQueue<>());
+        } else {
+            this.executor = executorService;
+        }
         this.baseUrl = baseUrl;
         this.auth = auth;
         this.locale = locale;
