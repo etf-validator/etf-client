@@ -47,7 +47,8 @@ final class ExecutableTestSuiteImpl extends AbstractMetadata implements Executab
         final String testDriverRef = jsonObject.getJSONObject("testDriver").getString("href");
         // fastest approach in the INSPIRE validator environment
         if (testDriverRef.contains("4dddc9e2-1b21-40b7-af70-6a2d156ad130")
-                || testDriverRef.contains("c8f39ab3-b0e4-4e06-924a-f31cc99a4932")) {
+                || testDriverRef.contains("c8f39ab3-b0e4-4e06-924a-f31cc99a4932")
+                || testDriverRef.contains("4e1653b9-58ca-44ba-85a0-b6fe410351bf")) {
             baseType = TestObjectBaseType.DATA_SET;
         } else {
             baseType = TestObjectBaseType.SERVICE;
