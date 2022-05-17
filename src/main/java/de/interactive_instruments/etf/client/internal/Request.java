@@ -48,6 +48,7 @@ abstract class Request {
                 .header("ETF-Client-Session-ID", ctx.sessionId);
 
         final HttpClient.Builder clientBuilder = HttpClient.newBuilder()
+                .executor(ctx.executor())
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL);
         if (ctx.auth != null) {

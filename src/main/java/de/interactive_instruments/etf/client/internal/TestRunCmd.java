@@ -213,14 +213,19 @@ class TestRunCmd implements TestRunCloseable, Comparable<TestRunCmd> {
         if (exception != null) {
             throw new ExecutionException(exception);
         }
+        final TestRunResult result;
         try {
             this.ctx.deregisterRun(this);
-            return future.get();
+            result = future.get();
         } catch (InterruptedException e) {
             throw new EtfIllegalStateException("Test Run has been interrupted", e);
         } catch (CancellationException c) {
             throw new EtfIllegalStateException("Test Run has been canceled", c);
         }
+        if (exception != null) {
+            throw new ExecutionException(exception);
+        }
+        return result;
     }
 
     @Override

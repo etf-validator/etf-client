@@ -1,5 +1,10 @@
 # ETF-Client Changelog
 
+## 1.7.5 - 2022-05-17
+
+### Changed
+- fix: ReferenceError not thrown
+
 ## 1.7.4 - 2021-09-03
 
 ### Added
