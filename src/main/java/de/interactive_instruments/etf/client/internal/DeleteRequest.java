@@ -36,13 +36,18 @@ class DeleteRequest extends Request {
 
     void delete() throws RemoteInvocationException {
         final HttpRequest request = this.requestBuilder.method("DELETE", noBody()).build();
-        try {
-            final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            checkResponse(response, 204);
-        } catch (final InterruptedException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final IOException e) {
-            throw new RemoteInvocationException(e);
+        int attempts = retryAttempts;
+        while (true) {
+            try {
+                final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+                checkResponse(response, 204);
+                break;
+            } catch (final InterruptedException e) {
+                throw new RemoteInvocationException(e);
+            } catch (final IOException e) {
+                if (attempts-- == 0) throw new RemoteInvocationException(e);
+                delay();
+            }
         }
     }
 }

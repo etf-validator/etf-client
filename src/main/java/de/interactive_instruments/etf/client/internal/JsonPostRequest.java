@@ -80,16 +80,20 @@ class JsonPostRequest extends Request {
         final HttpRequest request = newPostRequest().POST(body).headers(headers).build();
         final HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
         HttpResponse<String> response = null;
-        try {
-            response = httpClient.send(request, bodyHandler);
-            checkResponse(response, 200, 201);
-            return new JSONObject(response.body());
-        } catch (final InterruptedException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final IOException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final JSONException e) {
-            throw new RemoteInvocationException(e, response);
+        int attemps = retryAttempts;
+        while (true) {
+            try {
+                response = httpClient.send(request, bodyHandler);
+                checkResponse(response, 200, 201);
+                return new JSONObject(response.body());
+            } catch (final InterruptedException e) {
+                throw new RemoteInvocationException(e);
+            } catch (final IOException e) {
+                if(attemps-- == 0) throw new RemoteInvocationException(e);
+                delay();
+            } catch (final JSONException e) {
+                throw new RemoteInvocationException(e, response);
+            }
         }
     }
 

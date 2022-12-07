@@ -57,9 +57,8 @@ final class EndpointImpl implements EtfEndpoint {
     }
 
     EndpointImpl(final ExecutorService executorService, final URL baseUrl, final Locale locale, final Authenticator auth,
-            final Duration timout,
-            final DecimalFormat floatFormat) {
-        this.ctx = new InstanceCtx(executorService, toBaseUri(baseUrl), auth, locale, timout, floatFormat);
+                 final Duration timeout, final DecimalFormat floatFormat, final Duration retryDelay, final int retryAttempts) {
+        this.ctx = new InstanceCtx(executorService, toBaseUri(baseUrl), auth, locale, timeout, floatFormat, retryDelay, retryAttempts);
         this.statusCmd = new InstanceStatusCmd(ctx);
         this.tagCmd = new TagCollectionCmd(ctx);
         this.etsCollectionCmd = new EtsCollectionCmd(ctx);
