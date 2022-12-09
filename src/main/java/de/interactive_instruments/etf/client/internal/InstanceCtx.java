@@ -1,5 +1,5 @@
 /**
- * Copyright 2019-2020 interactive instruments GmbH
+ * Copyright 2019-2022 interactive instruments GmbH
  *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -16,8 +16,6 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
-import de.interactive_instruments.etf.client.EtfIllegalStateException;
-
 import java.net.Authenticator;
 import java.net.URI;
 import java.text.DecimalFormat;
@@ -25,6 +23,8 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import de.interactive_instruments.etf.client.EtfIllegalStateException;
 
 /**
  * @author Jon Herrmann ( herrmann aT interactive-instruments doT de )
@@ -67,7 +67,7 @@ final class InstanceCtx {
     }
 
     ExecutorService executor() {
-        if(shutdown) {
+        if (shutdown) {
             throw new EtfIllegalStateException("The connection to the endpoint with session ID '"
                     + this.sessionId + "' is closed");
         }
