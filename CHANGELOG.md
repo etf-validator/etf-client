@@ -1,5 +1,11 @@
 # ETF-Client Changelog
 
+## 1.7.6 - 2022-12-09
+
+### Changed
+- fix: possible deadlock on endpoint close()
+
+
 ## 1.7.5 - 2022-05-17
 
 ### Changed

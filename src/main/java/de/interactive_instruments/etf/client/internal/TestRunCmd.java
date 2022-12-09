@@ -272,7 +272,7 @@ class TestRunCmd implements TestRunCloseable, Comparable<TestRunCmd> {
             return testRunCmd;
         } catch (final RejectedExecutionException e) {
             throw new EtfIllegalStateException(
-                    "The Connection to the endpoint with session ID '"
+                    "The connection to the endpoint with session ID '"
                             + ctx.sessionId + "' has already been closed.");
         }
     }

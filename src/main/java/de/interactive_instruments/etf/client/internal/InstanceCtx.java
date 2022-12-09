@@ -16,6 +16,8 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
+import de.interactive_instruments.etf.client.EtfIllegalStateException;
+
 import java.net.Authenticator;
 import java.net.URI;
 import java.text.DecimalFormat;
@@ -37,6 +39,7 @@ final class InstanceCtx {
     final AtomicInteger requestNo = new AtomicInteger(1);
     private final DecimalFormat floatFormat;
     private final ExecutorService executor;
+    private boolean shutdown = false;
     private final Set<TestRunCmd> testRuns = new ConcurrentSkipListSet<>();
 
     InstanceCtx(final ExecutorService executorService, final URI baseUrl, final Authenticator auth, final Locale locale,
@@ -64,6 +67,10 @@ final class InstanceCtx {
     }
 
     ExecutorService executor() {
+        if(shutdown) {
+            throw new EtfIllegalStateException("The connection to the endpoint with session ID '"
+                    + this.sessionId + "' is closed");
+        }
         return executor;
     }
 
@@ -76,7 +83,7 @@ final class InstanceCtx {
     }
 
     synchronized void close() {
-        executor.shutdown();
+        shutdown = true;
         final Collection<TestRunCmd> testRunsCopy = new ArrayList<>(this.testRuns);
         for (final TestRunCmd run : testRunsCopy) {
             try {
@@ -86,6 +93,14 @@ final class InstanceCtx {
             } catch (final Exception ignore) {}
         }
         this.testRuns.clear();
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException ignore) {
+            executor.shutdownNow();
+        }
     }
 
     boolean formatFloats() {
