@@ -16,10 +16,12 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +36,16 @@ abstract class Request {
     private final static String USER_AGENT_HEADER = "ETF Client 1.6";
     private final static String ACCEPT_HEADER = "application/json";
     protected final Logger logger = LoggerFactory.getLogger(Request.class);
+    protected final Duration retryDelay;
+    protected final int retryAttempts;
 
     final HttpRequest.Builder requestBuilder;
     final HttpClient httpClient;
 
     Request(final URI url, final InstanceCtx ctx) {
+        retryDelay = ctx.retryDelay;
+        retryAttempts = ctx.retryAttempts;
+
         this.requestBuilder = HttpRequest.newBuilder(url)
                 .version(HttpClient.Version.HTTP_1_1)
                 .timeout(ctx.timeout)
@@ -58,12 +65,21 @@ abstract class Request {
         }
     }
 
-    final void checkResponse(final HttpResponse response, final int... expectedCodes) throws RemoteInvocationException {
+    final void checkResponse(final HttpResponse response, final int... expectedCodes) throws RemoteInvocationException, IOException {
         for (final int code : expectedCodes) {
             if (response.statusCode() == code) {
                 return;
             }
         }
-        throw new RemoteInvocationException(response);
+        if (response.statusCode() == 404) throw new IOException(response.toString());
+        else throw new RemoteInvocationException(response);
+    }
+
+    protected void delay() throws RemoteInvocationException {
+        try {
+            Thread.sleep(retryDelay.toMillis());
+        } catch (InterruptedException e) {
+            throw new RemoteInvocationException(e);
+        }
     }
 }

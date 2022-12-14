@@ -106,4 +106,13 @@ public interface EtfValidatorClient {
      * @return new Endpoint object
      */
     EtfEndpoint init();
+
+    /**
+     * Configure the number of retry attempts and the delay for GET and POST Requests, in the event of a connection loss
+     * @param delay time that should pass before another attempt
+     * @param attempts number of attempts before shutting down
+     * @return builder object
+     */
+    EtfValidatorClient retryOnConnectionReset(java.time.Duration delay, int attempts);
+
 }

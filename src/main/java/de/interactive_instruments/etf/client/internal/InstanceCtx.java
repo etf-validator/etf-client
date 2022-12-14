@@ -36,6 +36,8 @@ final class InstanceCtx {
     final Locale locale;
     final Duration timeout;
     final String sessionId;
+    final Duration retryDelay;
+    final int retryAttempts;
     final AtomicInteger requestNo = new AtomicInteger(1);
     private final DecimalFormat floatFormat;
     private final ExecutorService executor;
@@ -43,7 +45,7 @@ final class InstanceCtx {
     private final Set<TestRunCmd> testRuns = new ConcurrentSkipListSet<>();
 
     InstanceCtx(final ExecutorService executorService, final URI baseUrl, final Authenticator auth, final Locale locale,
-            final Duration timeout, final DecimalFormat floatFormat) {
+            final Duration timeout, final DecimalFormat floatFormat, final Duration retryDelay, final int retryAttempts) {
         if (executorService == null) {
             this.executor = new ThreadPoolExecutor(0, 256, 5,
                     TimeUnit.SECONDS, new SynchronousQueue<>());
@@ -56,6 +58,8 @@ final class InstanceCtx {
         this.sessionId = UUID.randomUUID().toString();
         this.timeout = timeout;
         this.floatFormat = floatFormat;
+        this.retryDelay = retryDelay;
+        this.retryAttempts = retryAttempts;
     }
 
     String format(final Object obj) {

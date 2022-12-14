@@ -18,6 +18,7 @@ package de.interactive_instruments.etf.client.test;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 
 import de.interactive_instruments.etf.client.EtfEndpoint;
 import de.interactive_instruments.etf.client.EtfValidatorClient;
@@ -36,9 +37,11 @@ public class Constants {
         }
     }
 
-    public final static EtfEndpoint ETF_ENDPOINT = EtfValidatorClient.create().url(ETF_TEST_SERVICE).init();
+    public final static EtfEndpoint ETF_ENDPOINT = EtfValidatorClient.create().url(ETF_TEST_SERVICE)
+            .retryOnConnectionReset(Duration.ofSeconds(1), 4).init();
 
     public final static EtfEndpoint create() {
-        return EtfValidatorClient.create().url(ETF_TEST_SERVICE).init();
+        return EtfValidatorClient.create().url(ETF_TEST_SERVICE)
+                .retryOnConnectionReset(Duration.ofSeconds(20), 4).init();
     }
 }

@@ -54,17 +54,21 @@ final class JsonGetRequest extends Request {
     synchronized boolean upToDate() throws RemoteInvocationException {
         final HttpRequest request = newBuilderWithConditionalRequest().method("HEAD", HttpRequest.BodyPublishers.noBody())
                 .build();
-        try {
-            final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-            checkResponse(response, 200, 204, 304, 405);
-            if (response.statusCode() == 405) {
-                logger.debug("Head operation blocked by server");
+        int attempts = retryAttempts;
+        while(true) {
+            try {
+                final HttpResponse<Void> response = httpClient.send(request, HttpResponse.BodyHandlers.discarding());
+                checkResponse(response, 200, 204, 304, 405);
+                if (response.statusCode() == 405) {
+                    logger.debug("Head operation blocked by server");
+                }
+                return response.statusCode() == 304;
+            } catch (final IOException e) {
+                if (attempts-- == 0) throw new RemoteInvocationException(e);
+                delay();
+            } catch (final InterruptedException e) {
+                throw new RemoteInvocationException(e);
             }
-            return response.statusCode() == 304;
-        } catch (final InterruptedException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final IOException e) {
-            throw new RemoteInvocationException(e);
         }
     }
 
@@ -72,19 +76,22 @@ final class JsonGetRequest extends Request {
         final HttpRequest request = newBuilder().GET().build();
         final HttpResponse.BodyHandler<String> bodyHandler = HttpResponse.BodyHandlers.ofString();
         HttpResponse<String> response = null;
-        try {
-            response = httpClient.send(request, bodyHandler);
-            checkResponse(response, 200);
-            final String dateHeaderValue = response.headers().firstValue("date").orElse(ifModifiedSinceValue);
-            ifModifiedSinceValue = response.headers().firstValue("Last-Modified").orElse(dateHeaderValue);
-            return new JSONObject(response.body());
-        } catch (final InterruptedException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final IOException e) {
-            throw new RemoteInvocationException(e);
-        } catch (final JSONException e) {
-            throw new RemoteInvocationException(e, response);
+        int attempts = retryAttempts;
+        while (true) {
+            try {
+                response = httpClient.send(request, bodyHandler);
+                checkResponse(response, 200);
+                final String dateHeaderValue = response.headers().firstValue("date").orElse(ifModifiedSinceValue);
+                ifModifiedSinceValue = response.headers().firstValue("Last-Modified").orElse(dateHeaderValue);
+                return new JSONObject(response.body());
+            } catch( final InterruptedException e){
+                throw new RemoteInvocationException(e);
+            } catch( final IOException e){
+                if (attempts-- == 0) throw new RemoteInvocationException(e);
+                delay();
+            } catch( final JSONException e){
+                throw new RemoteInvocationException(e, response);
+            }
         }
     }
-
 }

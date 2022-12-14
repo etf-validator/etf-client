@@ -41,6 +41,8 @@ final public class EndpointBuilderImpl implements EtfValidatorClientWithExecutor
     private DecimalFormat floatFormat = new DecimalFormat(
             "0.#######", new DecimalFormatSymbols(Locale.ENGLISH));
     private ExecutorService executorService = null;
+    private Duration retryDelay = Duration.ofSeconds(0);
+    private int retryAttempts = 0;
 
     @Override
     public EtfValidatorClient url(final URL url) {
@@ -83,6 +85,13 @@ final public class EndpointBuilderImpl implements EtfValidatorClientWithExecutor
         Objects.requireNonNull(this.url, "URL not set");
         Objects.requireNonNull(this.locale, "Locale not set");
         return new EndpointImpl(executorService, this.url, this.locale, this.auth, this.timeout,
-                this.floatFormat);
+                this.floatFormat, this.retryDelay, this.retryAttempts);
+    }
+
+    @Override
+    public EtfValidatorClient retryOnConnectionReset(Duration delay, int attempts) {
+        this.retryDelay = delay;
+        this.retryAttempts = attempts;
+        return this;
     }
 }
