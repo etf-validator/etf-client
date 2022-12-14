@@ -1,5 +1,5 @@
 /**
- * Copyright 2019-2020 interactive instruments GmbH
+ * Copyright 2019-2022 interactive instruments GmbH
  *
  * Licensed under the EUPL, Version 1.2 or - as soon they will be approved by
  * the European Commission - subsequent versions of the EUPL (the "Licence");
@@ -143,7 +143,7 @@ public class ExecutableTestSuiteTest {
 
         final EtsCollection metadataEtss = etfEndpoint.executableTestSuites().itemsByTag(metadataTag);
         assertNotNull(metadataEtss);
-        assertEquals(9, metadataEtss.size());
+        assertEquals(10, metadataEtss.size());
 
         boolean etsFound1 = false;
         boolean etsFound2 = false;
@@ -233,6 +233,21 @@ public class ExecutableTestSuiteTest {
     }
 
     @Test
+    void errorOnClosedCtx() throws RemoteInvocationException, MalformedURLException, InterruptedException {
+        final EtfEndpoint etfEndpoint = Constants.create();
+
+        final ExecutableTestSuite metadataEts = etfEndpoint.executableTestSuites().itemById(ETS_ID).get();
+        assertNotNull(metadataEts);
+
+        final AdHocTestObject testObject = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
+        assertNotNull(testObject);
+
+        etfEndpoint.close();
+
+        assertThrows(EtfIllegalStateException.class, () -> metadataEts.execute(testObject));
+    }
+
+    @Test
     void startMultipleEtsInOneRun() throws RemoteInvocationException, MalformedURLException {
         final EtfEndpoint etfEndpoint = Constants.ETF_ENDPOINT;
 
@@ -264,12 +279,12 @@ public class ExecutableTestSuiteTest {
 
         final AdHocTestObject testObject1 = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
         assertNotNull(testObject1);
-        final TestRun testRun1 = metadataEtss.execute(testObject1, t -> {});
+        final TestRun testRun1 = metadataEtss.execute(testObject1, t -> {}, metadataEtss.parameters().labelSuffix("c1"));
         assertNotNull(testRun1);
 
         final AdHocTestObject testObject2 = etfEndpoint.newAdHocTestObject().fromDataSet(new URL(METADATA_TEST_URL));
         assertNotNull(testObject2);
-        final TestRun testRun2 = metadataEtss.execute(testObject2, t -> {});
+        final TestRun testRun2 = metadataEtss.execute(testObject2, t -> {}, metadataEtss.parameters().labelSuffix("c2"));
         assertNotNull(testRun2);
 
         Thread.sleep(500);
