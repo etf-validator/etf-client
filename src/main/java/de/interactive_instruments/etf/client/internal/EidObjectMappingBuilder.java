@@ -16,8 +16,8 @@
  */
 package de.interactive_instruments.etf.client.internal;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONObject;
 
@@ -29,7 +29,7 @@ class EidObjectMappingBuilder {
     private final Map<String, JSONObject> idObjMap;
 
     EidObjectMappingBuilder() {
-        this.idObjMap = new HashMap<>();
+        this.idObjMap = new ConcurrentHashMap<>();
     }
 
     void add(final JSONObject obj) {
