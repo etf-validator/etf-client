@@ -1,5 +1,20 @@
 # ETF-Client Changelog
 
+## 1.9.1 - 2022-03-16
+
+### Changed
+- fix: Eid Mapping
+
+## 1.9.0 - 2022-12-15
+
+### Changed
+- feat: support status query of tmp and persistent data space
+
+## 1.8.0 - 2022-12-13
+
+### Added
+- feat: retryOnConnectionReset
+
 ## 1.7.6 - 2022-12-09
 
 ### Changed
